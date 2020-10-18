@@ -4,6 +4,6 @@ namespace retecs.ReteCs.Interfaces
 {
     public interface INodesData
     {
-        public Dictionary<string, INodeData> Nodes { get; set; }
+        public Dictionary<string, NodeData> Nodes { get; set; }
     }
 }

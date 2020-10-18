@@ -2,7 +2,7 @@
 {
     public interface IConnectionData
     {
-        public int Node { get; set; }
+        public string Node { get; set; }
         public object Data { get; set; }
     }
 }
