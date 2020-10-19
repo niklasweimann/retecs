@@ -7,7 +7,7 @@ namespace retecs.ReteCs.core
 {
     public class Validator
     {
-        public static bool IsValidData(IData data)
+        public static bool IsValidData(Data data)
         {
             return IsValidId(data.Id);
         }
@@ -18,7 +18,7 @@ namespace retecs.ReteCs.core
             return regex.IsMatch(id);
         }
 
-        public static (bool success, string message) Validate(string id, IData data)
+        public static (bool success, string message) Validate(string id, Data data)
         {
             var id1 = id.Split("@");
             var id2 = data.Id.Split("@");

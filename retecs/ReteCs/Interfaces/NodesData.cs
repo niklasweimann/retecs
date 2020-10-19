@@ -2,7 +2,7 @@
 
 namespace retecs.ReteCs.Interfaces
 {
-    public interface INodesData
+    public class NodesData
     {
         public Dictionary<string, NodeData> Nodes { get; set; }
     }

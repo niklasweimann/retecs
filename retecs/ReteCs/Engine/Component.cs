@@ -1,6 +1,9 @@
-﻿namespace retecs.ReteCs.Engine
+﻿using System.Collections.Generic;
+using retecs.ReteCs.Interfaces;
+
+namespace retecs.ReteCs.Engine
 {
-    public class Component
+    public abstract class Component
     {
         public string Name { get; set; }
         public object Data { get; set; }
@@ -10,5 +13,10 @@
         {
             Name = name;
         }
+
+        public abstract void Worker(NodeData node,
+            Dictionary<string, List<WorkerOutput>> inputs,
+            Dictionary<string, WorkerOutput> outputs,
+            params object[] args);
     }
 }
