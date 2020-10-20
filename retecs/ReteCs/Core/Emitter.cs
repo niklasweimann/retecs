@@ -14,9 +14,7 @@ namespace retecs.ReteCs.core
 
         public Emitter<T> On(List<string> names, Func<object, bool> handler)
         {
-            var events = names;
-
-            foreach (var @event in events)
+            foreach (var @event in names)
             {
                 if (!Events.ContainsKey(@event))
                 {
