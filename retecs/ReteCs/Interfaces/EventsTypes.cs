@@ -1,6 +1,6 @@
 ﻿namespace retecs.ReteCs.Interfaces
 {
-    public interface EventsTypes
+    public class EventsTypes
     {
         
     }

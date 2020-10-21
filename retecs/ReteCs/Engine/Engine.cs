@@ -93,11 +93,11 @@ namespace retecs.ReteCs.Engine
             node.UnlockPool ??= new List<Action>();
             if (node.Busy && node.OutputData != null)
             {
-                node.UnlockPool.Add(res);
+                //node.UnlockPool.Add(res);
             }
             else
             {
-                res();
+                //res();
             }
 
             node.Busy = false;
@@ -110,17 +110,17 @@ namespace retecs.ReteCs.Engine
             node.Busy = false;
         }
 
-        private Dictionary<string, object> ExtractInputData(NodeData nodeData)
+        private Dictionary<string, List<WorkerOutput>> ExtractInputData(NodeData nodeData)
         {
-            var obj = new Dictionary<string, object>();
+            var obj = new Dictionary<string, List<WorkerOutput>>();
             foreach (var key in nodeData.Inputs.Keys)
             {
                 var input = nodeData.Inputs[key];
                 var connections = input.Connections;
-                var connData = new List<>();
+                var connData = new List<WorkerOutput>();
                 foreach (var connection in connections)
                 {
-                    var prevNode = (Data as IData)?.Nodes[connection.Node];
+                    var prevNode = (Data as Data)?.Nodes[connection.Node];
                     var outputs = ProcessNode(prevNode as EngineNode);
                     if (outputs == null)
                     {
@@ -138,14 +138,14 @@ namespace retecs.ReteCs.Engine
             return obj;
         }
 
-        private WorkerOutput ProcessWorker(NodeData nodeData)
+        private Dictionary<string, WorkerOutput> ProcessWorker(NodeData nodeData)
         {
             var inputData = ExtractInputData(nodeData);
             var component = Components[nodeData.Name];
-            var outputData = new WorkerOutput();
+            var outputData = new Dictionary<string, WorkerOutput>();
             try
             {
-                component.worker(nodeData, inputData, outputData, Args);
+                component.Worker(nodeData, inputData, outputData, Args);
             }
             catch (Exception e)
             {
@@ -156,7 +156,7 @@ namespace retecs.ReteCs.Engine
             return outputData;
         }
 
-        private WorkerOutput ProcessNode(EngineNode node)
+        private Dictionary<string, WorkerOutput> ProcessNode(EngineNode node)
         {
             if (State == State.Abort || node == null)
             {
@@ -180,7 +180,7 @@ namespace retecs.ReteCs.Engine
                 return null;
             var res = new List<NodeData>();
             foreach (var nextNode in node.Outputs.Values.SelectMany(output =>
-                output.Connections.Select(connection => (Data as IData)?.Nodes[connection.Node])))
+                output.Connections.Select(connection => (Data as Data)?.Nodes[connection.Node])))
             {
                 ProcessNode(nextNode as EngineNode);
                 ForwardProcess(nextNode);
@@ -190,12 +190,12 @@ namespace retecs.ReteCs.Engine
             return res;
         }
 
-        public IData Copy(IData data)
+        public Data Copy(Data data)
         {
             throw new NotImplementedException();
         }
 
-        public bool Validate(IData data)
+        public bool Validate(Data data)
         {
             var (success, message) = Validator.Validate(Id, data);
             var recursion = new Recursion(data.Nodes);
@@ -213,9 +213,9 @@ namespace retecs.ReteCs.Engine
             return true;
         }
 
-        public void ProcessStartNode()
+        public void ProcessStartNode(string id)
         {
-            var startNode = (Data as IData)?.Nodes[Id];
+            var startNode = (Data as Data)?.Nodes[id];
             if (startNode == null)
             {
                 throw new Exception("Node with such id not found");
@@ -227,7 +227,7 @@ namespace retecs.ReteCs.Engine
 
         private void ProcessUnreachable()
         {
-            var data = Data as IData;
+            var data = Data as Data;
             foreach (var node in data.Nodes.Keys)
             {
                 var currNode = data.Nodes[node] as EngineNode;
@@ -237,6 +237,20 @@ namespace retecs.ReteCs.Engine
                     ForwardProcess(currNode);
                 }
             }
+        }
+
+        private string Process(Data data, string startId, params object[] args)
+        {
+            if (!ProcessStart() || !Validate(data))
+            {
+                return null;
+            }
+
+            Data = data;
+            Args = args.ToList();
+            ProcessStartNode(startId);
+            ProcessUnreachable();
+            return ProcessDone() ? "sucess" : "aborted";
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace retecs.ReteCs.Interfaces
 {
-    public interface IOutputConnectionData : IConnectionData
+    public class OutputConnectionData : ConnectionData
     {
         public string Input { get; set; }
     }

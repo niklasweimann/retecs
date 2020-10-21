@@ -7,6 +7,6 @@ namespace retecs.ReteCs.Interfaces
     {
         public bool Busy { get; set; }
         public List<Action> UnlockPool { get; set; }
-        public WorkerOutput OutputData { get; set; }
+        public Dictionary<string, WorkerOutput>  OutputData { get; set; }
     }
 }
