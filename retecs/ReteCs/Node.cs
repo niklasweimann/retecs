@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using retecs.ReteCs.Interfaces;
 
 namespace retecs.ReteCs
 {
@@ -10,7 +9,7 @@ namespace retecs.ReteCs
         public string Name { get; set; }
         public string Id { get; set; }
 
-        public (int, int) Position { get; set; }
+        public (double X, double Y) Position { get; set; }
         public Dictionary<string, Input> Inputs { get; set; }
         public Dictionary<string, Output> Outputs { get; set; }
         public Dictionary<string, Control> Controls { get; set; }

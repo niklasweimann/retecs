@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using retecs.ReteCs.Interfaces;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs.core
 {

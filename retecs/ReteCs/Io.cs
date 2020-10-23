@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using retecs.ReteCs.Interfaces;
 
 namespace retecs.ReteCs
 {

@@ -4,19 +4,19 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using retecs.ReteCs.core;
+using retecs.ReteCs.Entities;
 using retecs.ReteCs.Enums;
-using retecs.ReteCs.Interfaces;
 
 namespace retecs.ReteCs.Engine
 {
-    public class Engine : Context<EventsTypes>
+    public class Engine : Context
     {
         public List<object> Args { get; set; }
         public object Data { get; set; }
         public State State { get; set; } = State.Available;
         public Action OnAbort { get; set; }
 
-        public Engine(string id): base(id, new Dictionary<string, List<Func<object, bool>>>())
+        public Engine(string id): base(id)
         {
         }
 
@@ -34,7 +34,7 @@ namespace retecs.ReteCs.Engine
         public string ThrowError(string message, object data)
         {
             Abort();
-            Trigger("error", new {message, data});
+            base.OnWarn(message, data);
             ProcessDone();
             return "error";
         }
@@ -150,7 +150,7 @@ namespace retecs.ReteCs.Engine
             catch (Exception e)
             {
                 Abort();
-                Trigger("warn", e);
+                base.OnWarn(e.Message, e);
             }
 
             return outputData;

@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
 using retecs.ReteCs.core;
-using retecs.ReteCs.Interfaces;
+using retecs.ReteCs.View;
 
 namespace retecs.ReteCs
 {
-    public class NodeEditor: Context<EventsTypes>
+    public class NodeEditor: Context
     {
         public List<Node> Nodes { get; set; }
         public Selected Selected { get; set; }
         public EditorView View { get; set; }
-        public NodeEditor(string id, ElementReference container) : base(id, new EditorEvents())
+        public NodeEditor(string id, ElementReference container) : base(id)
         {
-            View = new EditorView(container, Components, this);
-            
-            On(new List<string>{"destroy"}, )}
+            View = new EditorView(container, Components);
+
+            OnDestroy();
         }
     }
 }

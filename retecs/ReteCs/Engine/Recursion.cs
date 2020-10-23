@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using retecs.ReteCs.Interfaces;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs.Engine
 {

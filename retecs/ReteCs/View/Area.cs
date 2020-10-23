@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.core;
+using retecs.ReteCs.Entities;
 using retecs.ReteCs.Enums;
-using retecs.ReteCs.Interfaces;
 
 namespace retecs.ReteCs.View
 {
-    public class Area : Emitter<EventsTypes>
+    public class Area : Emitter
     {
         public RenderFragment ElRenderFragment { get; set; }
         public ElementReference Container { get; set; }
@@ -18,7 +19,7 @@ namespace retecs.ReteCs.View
         private Zoom _zoom;
         private Drag _drag;
 
-        public Area(ElementReference container, Dictionary<string, List<Func<object, bool>>> events) : base(events)
+        public Area(ElementReference container)
         {
             Container = container;
             ElRenderFragment = builder =>
@@ -29,7 +30,7 @@ namespace retecs.ReteCs.View
 
             _zoom = new Zoom(container, ElRenderFragment, 0.1,
                 (delta, ox, oy, source) => { OnZoom(delta, ox, oy, source); });
-            _drag = new Drag(container, (x, y) => { OnTranslate(x, y); }, OnStart);
+            _drag = new Drag(container, (x, y, _) => { OnTranslate(x, y); }, (_) =>  OnStart());
 
             On(new List<string> {"destroy"}, _ =>
             {
@@ -61,7 +62,7 @@ namespace retecs.ReteCs.View
             var k = Transform.K;
 
             Mouse = new Mouse(x / k, y / k);
-            Trigger("mousemove", Mouse);
+            OnMouseMove(Mouse);
         }
 
 
@@ -70,7 +71,7 @@ namespace retecs.ReteCs.View
             _startPosition = Transform;
         }
 
-        private void OnTranslate(int dx, int dy)
+        private void OnTranslate(double dx, double dy)
         {
             if (_zoom.Translating)
             {
@@ -96,7 +97,7 @@ namespace retecs.ReteCs.View
             Transform.Y = parameters.y;
 
             Update();
-            Trigger("translated");
+            OnTranslated();
         }
 
         private void OnZoom(double delta, int ox, int oy, ZoomSource source)
@@ -119,7 +120,7 @@ namespace retecs.ReteCs.View
             Transform.Y += oy * d;
 
             Update();
-            Trigger("zoomed", source);
+            OnZoomed(source);
         }
 
         public void AppendChild()

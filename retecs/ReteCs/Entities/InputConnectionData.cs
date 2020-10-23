@@ -1,4 +1,4 @@
-﻿namespace retecs.ReteCs.Interfaces
+﻿namespace retecs.ReteCs.Entities
 {
     public class InputConnectionData : ConnectionData
     {

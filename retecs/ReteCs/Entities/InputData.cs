@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace retecs.ReteCs.Interfaces
+namespace retecs.ReteCs.Entities
 {
     public class InputData
     {

@@ -5,13 +5,13 @@ using retecs.ReteCs.Engine;
 
 namespace retecs.ReteCs.core
 {
-    public class Context<T> : Emitter<T>
+    public class Context : Emitter
     {
         public string Id { get; set; }
         public Dictionary<string, object> Plugins { get; set; }
         public Dictionary<string, Component> Components { get; set; }
 
-        public Context(string id, Dictionary<string, List<Func<object, bool>>> events) : base(events)
+        public Context(string id)
         {
             if(Validator.IsValidId(id))
                 throw new Exception("Id should be valid to name@0.1.0 format");
@@ -39,12 +39,12 @@ namespace retecs.ReteCs.core
             }
             
             Components.Add(component.Name, component);
-            Trigger("componentregister", component);
+            OnComponentRegister(component);
         }
 
         ~Context()
         {
-            Trigger("destroy");
+            OnDestroy();
         }
     }
 }
