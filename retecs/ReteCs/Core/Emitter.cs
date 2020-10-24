@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.Entities;
@@ -154,7 +153,6 @@ namespace retecs.ReteCs.core
         public event RenderConnectionEventHandler RenderConnection;
         public event UpdateConnectionEventHandler UpdateConnection;
 
-        // TODO: Add dataType Point
         public void OnRenderConnection(ElementReference elementReference, Connection connection, (Point, Point) points) =>
             RenderConnection?.Invoke(elementReference, connection, points);
 

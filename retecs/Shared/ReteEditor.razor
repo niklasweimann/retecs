@@ -2,6 +2,9 @@
 @using retecs.ReteCs.Entities
 @using Component = retecs.ReteCs.Component
 @using retecs.Components
+@using System.Text.Json
+@using retecs.ReteCs.JsInterop
+@inject IJSRuntime JsRuntime;
 <div id="rete" @ref="_containerRef"></div>
 
 @code {
@@ -11,11 +14,18 @@
 
     protected override void OnAfterRender(bool firstRender)
     {
-        Editor = new NodeEditor(Guid.NewGuid().ToString(), _containerRef);
-    // editor.use(ConnectionPlugin, { curvature: 0.4 });
-    // editor.use(AlightRenderPlugin);
-    // editor.use(ContextMenuPlugin);
+        if (!firstRender)
+        {
+            base.OnAfterRender(false);
+            return;
+        }
+        EventInterop.JsRuntime = JsRuntime;
 
+        Editor = new NodeEditor(Guid.NewGuid().ToString(), _containerRef);
+        // editor.use(ConnectionPlugin, { curvature: 0.4 });
+        // editor.use(AlightRenderPlugin);
+        // editor.use(ContextMenuPlugin);
+        
         Engine = new Engine(Guid.NewGuid().ToString());
         var components = new List<Component> {new NumComponent()};
         components.ForEach(component =>
@@ -29,6 +39,7 @@
             {"num", 2}
         });
         n1.Position = new Point(80, 200);
+        Console.WriteLine(JsonSerializer.Serialize(n1));
         Editor.AddNode(n1);
 
         Editor.Process += RequestAnimationFrame;
@@ -36,8 +47,7 @@
         Editor.ConnectionRemoved += _ => RequestAnimationFrame();
 
         Editor.View.Resize();
-
-        base.OnAfterRender(firstRender);
+        base.OnAfterRender(true);
     }
 
     public void RequestAnimationFrame()

@@ -72,19 +72,19 @@ namespace retecs.ReteCs.Engine
 
         public void Abort()
         {
-            if (State == State.Processed)
+            switch (State)
             {
-                State = State.Abort;
-                // TODO: this.onAbort = ret;
-            }
-            else if(State == State.Abort)
-            {
-                OnAbort.Invoke();
-                // TODO: this.onAbort = ret; 
-            }
-            else
-            {
-                //ret();
+                case State.Processed:
+                    State = State.Abort;
+                    //OnAbort = ret;
+                    break;
+                case State.Abort:
+                    OnAbort.Invoke();
+                    //OnAbort = ret; 
+                    break;
+                default:
+                    //ret();
+                    break;
             }
         }
 

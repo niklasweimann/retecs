@@ -6,8 +6,8 @@ namespace retecs.ReteCs.Engine
 {
     public class Recursion
     {
-        public Dictionary<string, NodeData> Nodes { get; set; }
-        
+        public Dictionary<string, NodeData> Nodes { get; }
+
         public Recursion(Dictionary<string, NodeData> nodes)
         {
             Nodes = nodes;
@@ -18,15 +18,9 @@ namespace retecs.ReteCs.Engine
             var res = new List<NodeData>();
             foreach (var nodeDataInput in nodeData.Inputs)
             {
-                var connections = nodeData.Inputs[nodeDataInput.Key];
-                var nodesData = new List<NodeData>();
-                foreach (var connection in connections.Connections)
-                {
-                    // TODO b
-                    nodesData.Add(Nodes[connection.Node]);
-                }
+                var nodesData = nodeData.Inputs[nodeDataInput.Key].Connections
+                    .Select(connection => Nodes[connection.Node]).ToList();
                 res.AddRange(nodesData);
-                //TODO acc
             }
 
             return res;
@@ -42,7 +36,7 @@ namespace retecs.ReteCs.Engine
 
             foreach (var node in inputNodes)
             {
-                var l = new List<NodeData>{node};
+                var l = new List<NodeData> {node};
                 l.AddRange(list);
                 var inter = FindSelf(l, ExtractInputNodes(node));
 

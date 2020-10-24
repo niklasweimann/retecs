@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
+using retecs.ReteCs.JsInterop;
 
 namespace retecs.ReteCs.View
 {
@@ -11,9 +12,10 @@ namespace retecs.ReteCs.View
     {
         public ElementReference Container { get; set; }
         public Dictionary<string, Component> Components { get; set; }
-        public Dictionary<Node, NodeView> Nodes { get; set; }
-        public Dictionary<Connection, ConnectionView> Connections { get; set; }
+        public Dictionary<Node, NodeView> Nodes { get; } = new Dictionary<Node, NodeView>();
+        public Dictionary<Connection, ConnectionView> Connections { get; } = new Dictionary<Connection, ConnectionView>();
         public Area Area { get; set; }
+        public EventInterop EventInterop { get; } = new EventInterop();
 
         public EditorView(ElementReference container, Dictionary<string, Component> components)
         {
@@ -21,8 +23,9 @@ namespace retecs.ReteCs.View
             Components = components;
             // TODO
             //this.container.style.overflow = 'hidden';
-            //this.container.addEventListener('click', this.click.bind(this));
-            //this.container.addEventListener('contextmenu', e => this.trigger('contextmenu', { e, view: this }));
+            EventInterop.AddEventListener(Container, "click", mouse => Click((MouseEventArgs)mouse));
+            EventInterop.AddEventListener(Container, "contextmenu",
+                eventArgs => OnContextMenu((MouseEventArgs) eventArgs, this));
 
             Destroy += () =>
             {
@@ -35,8 +38,7 @@ namespace retecs.ReteCs.View
 
             NodeTranslated += UpdateConnections;
             Area = new Area(container);
-            // TODO
-            //Container.appendChild(Area.ElRenderFragment);
+            EventInterop.AppendChild(Container, Area.ElementReference);
         }
 
         public void AddNode(Node node)

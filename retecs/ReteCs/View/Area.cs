@@ -1,17 +1,18 @@
-﻿using System;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 using retecs.ReteCs.Enums;
+using retecs.ReteCs.JsInterop;
 
 namespace retecs.ReteCs.View
 {
     public class Area : Emitter
     {
-        public ElementReference ElRenderFragment { get; set; }
-        public ElementReference Container { get; set; }
+        public ElementReference ElementReference { get; set; }
+        public ElementReference Container { get; }
         public Transform Transform { get; set; }
         public Mouse Mouse { get; set; }
+        public EventInterop EventInterop { get; } = new EventInterop();
 
         private Transform _startPosition;
         private Zoom _zoom;
@@ -25,17 +26,16 @@ namespace retecs.ReteCs.View
              TODO
              * const el = this.el = document.createElement('div');
 
-        this.container = container;
-        el.style.transformOrigin = '0 0';
+                this.container = container;
+                el.style.transformOrigin = '0 0';
              */
 
-            _zoom = new Zoom(container, ElRenderFragment, 0.1, OnZoom);
+            _zoom = new Zoom(container, ElementReference, 0.1, OnZoom);
             _drag = new Drag(container, (point, _) => { OnTranslate(point); }, _ => OnStart());
 
             Destroy += HandleDestroy;
 
-            //Todo: JSRuntime interop
-            //this.container.addEventListener('pointermove', this.pointermove.bind(this));
+            EventInterop.AddEventListener(Container, "pointermove", _ =>  PointerMove());
 
             Update();
         }
@@ -112,12 +112,12 @@ namespace retecs.ReteCs.View
 
         public void AppendChild(ElementReference connViewHtmlElement)
         {
-            throw new NotImplementedException();
+            EventInterop.AppendChild(ElementReference, connViewHtmlElement);
         }
 
         public void RemoveChild(ElementReference connViewHtmlElement)
         {
-            throw new NotImplementedException();
+            EventInterop.RemoveChild(ElementReference, connViewHtmlElement);
         }
 
         public void HandleDestroy()

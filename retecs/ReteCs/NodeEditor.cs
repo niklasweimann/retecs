@@ -18,6 +18,7 @@ namespace retecs.ReteCs
         public NodeEditor(string id, ElementReference container) : base(id)
         {
             View = new EditorView(container, Components);
+            Nodes = new List<Node>();
 
             Destroy += () => Utils.ListenWindow("keydown", keydown => OnKeyDown((KeyboardEventArgs) keydown));
             Destroy += () => Utils.ListenWindow("keyup", keyup => OnKeyUp((KeyboardEventArgs) keyup));
