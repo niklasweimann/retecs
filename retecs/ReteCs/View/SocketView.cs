@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
 using retecs.ReteCs.core;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs.View
 {
@@ -21,7 +22,7 @@ namespace retecs.ReteCs.View
             OnRenderSocket(elementReference, io.Socket, io);
         }
 
-        public (double posX, double posY) GetPosition((double posX, double posY) position)
+        public Point GetPosition(Point position)
         {
             // TODO: Get ElementReference offsetLeft and offsetWidth and offsetTop and offsetHeight
             /*
@@ -29,7 +30,7 @@ namespace retecs.ReteCs.View
             position[0] + el.offsetLeft + el.offsetWidth / 2,
             position[1] + el.offsetTop + el.offsetHeight / 2
              */
-            return (1, 1);
+            return new Point(1, 1);
         }
     }
 }

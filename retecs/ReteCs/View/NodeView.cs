@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.core;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs.View
 {
@@ -15,7 +16,7 @@ namespace retecs.ReteCs.View
         public Dictionary<Control, ControlView> Controls { get; set; }
 
         public ElementReference HtmlElement { get; set; }
-        public (double x, double y) StartPosition { get; set; }
+        public Point StartPosition { get; set; }
         public Drag Drag { get; set; }
 
         public NodeView(Node node, Component component)
@@ -28,11 +29,12 @@ namespace retecs.ReteCs.View
         this.el.style.position = 'absolute';
              */
             //this.el.addEventListener('contextmenu', e => this.trigger('contextmenu', { e, node: this.node }));
-            Drag = new Drag(HtmlElement, (double, double, MouseEventArgs) => OnTranslate(), () => OnSelect(), () =>
+            Drag = new Drag(HtmlElement, (point, _) => OnTranslate(point), mouseEventArgs => OnSelect(mouseEventArgs), (_) =>
             {
                 OnNodeDragged(node);
             });
-            OnRenderNode(HtmlElement, node, component.Data, () => BindSocket(), () => BindControl());
+            OnRenderNode(HtmlElement, node, component.Data, (reference, type, io) => BindSocket(reference, type, io),
+                (reference, control) => BindControl(reference, control));
             Update();
         }
 
@@ -59,7 +61,7 @@ namespace retecs.ReteCs.View
             Controls.Add(control, new ControlView(htmlElement, control));
         }
 
-        public (double posX, double posY) GetSocketPosition(Io io)
+        public Point GetSocketPosition(Io io)
         {
             Sockets.TryGetValue(io, out var value);
             if (value == null)
@@ -67,7 +69,7 @@ namespace retecs.ReteCs.View
                 throw new Exception($"Socket not found for ${io.Name} with key ${io.Key}");
             }
 
-            return value.GetPosition(((double)Node.Position.Item1, (double)Node.Position.Item2));
+            return value.GetPosition(Node.Position);
         }
 
         public void OnSelect(MouseEventArgs mouseEventArgs)
@@ -82,30 +84,26 @@ namespace retecs.ReteCs.View
             StartPosition = Node.Position;
         }
 
-        public void OnTranslate(int dx, int dy)
+        public void OnTranslate(Point point)
         {
-            OnTranslateNode(Node, dx, dy);
+            OnTranslateNode(Node, point);
         }
 
-        public void OnDrag(int dx, int dy)
+        public void OnDrag(Point point)
         {
-            var x = StartPosition.x + dx;
-            var y = StartPosition.y + dy;
+            var x = StartPosition.X + point.X;
+            var y = StartPosition.Y + point.Y;
             Translate(x, y);
         }
 
         public void Translate(double x, double y)
         {
             var param = new {Node, x, y};
-            if (Trigger("nodetranslate", param))
-            {
-                return;
-            }
-
+            OnNodeTranslate(Node, x, y);
             var prev = Node.Position;
-            Node.Position = (param.x, param.y);
+            Node.Position = new Point(param.x, param.y);
             Update();
-            OnNodeTranslated(Node, prev.X, prev.Y);
+            OnNodeTranslated(Node, prev);
         }
 
         public void Update()

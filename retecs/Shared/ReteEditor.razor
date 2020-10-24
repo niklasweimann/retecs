@@ -1,0 +1,49 @@
+﻿@using retecs.ReteCs.Engine
+@using retecs.ReteCs.Entities
+@using Component = retecs.ReteCs.Component
+@using retecs.Components
+<div id="rete" @ref="_containerRef"></div>
+
+@code {
+    public NodeEditor Editor { get; set; }
+    public Engine Engine { get; set; }
+    ElementReference _containerRef;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        Editor = new NodeEditor(Guid.NewGuid().ToString(), _containerRef);
+    // editor.use(ConnectionPlugin, { curvature: 0.4 });
+    // editor.use(AlightRenderPlugin);
+    // editor.use(ContextMenuPlugin);
+
+        Engine = new Engine(Guid.NewGuid().ToString());
+        var components = new List<Component> {new NumComponent()};
+        components.ForEach(component =>
+        {
+            Editor.Register(component);
+            Engine.Register(component);
+        });
+
+        var n1 = components[0].CreateNode(new Dictionary<string, object>()
+        {
+            {"num", 2}
+        });
+        n1.Position = new Point(80, 200);
+        Editor.AddNode(n1);
+
+        Editor.Process += RequestAnimationFrame;
+        Editor.ConnectionCreated += _ => RequestAnimationFrame();
+        Editor.ConnectionRemoved += _ => RequestAnimationFrame();
+
+        Editor.View.Resize();
+
+        base.OnAfterRender(firstRender);
+    }
+
+    public void RequestAnimationFrame()
+    {
+        Engine.Abort();
+        Engine.ProcessData(Editor.ToJson());
+    }
+
+}

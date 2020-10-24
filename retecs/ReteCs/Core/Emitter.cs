@@ -25,8 +25,8 @@ namespace retecs.ReteCs.core
         public event ComponentRegisterEventHandler ComponentRegister;
         public event DestroyEventHandler Destroy;
 
-        public void OnWarn(string warn, object data) => Warn?.Invoke(warn, data);
-        public void OnError(string error, object data) => Error?.Invoke(error, data);
+        public void OnWarn(string warn, object data = null) => Warn?.Invoke(warn, data);
+        public void OnError(string error, object data = null) => Error?.Invoke(error, data);
         public void OnComponentRegister(Component component) => ComponentRegister?.Invoke(component);
         public void OnDestroy() => Destroy?.Invoke();
 
@@ -44,9 +44,9 @@ namespace retecs.ReteCs.core
 
         public delegate void NodeTranslateEventHandler(Node node, double x, double y);
 
-        public delegate void NodeTranslatedEventHandler(Node node, double prevX, double prevY);
+        public delegate void NodeTranslatedEventHandler(Node node, Point prevPoint);
 
-        public delegate void TranslateNodeEventHandler(Node node, double dx, double dy);
+        public delegate void TranslateNodeEventHandler(Node node, Point point);
 
         public delegate void NodeDraggedEventHandler(Node node);
 
@@ -59,7 +59,7 @@ namespace retecs.ReteCs.core
         public delegate void NodeSelectedEventHandler(Node node);
 
         public delegate void RenderNodeEventHandler(ElementReference elementReference, Node node, object componentData,
-            Action bindSocket, Action bindControl);
+            Action<ElementReference, string, Io> bindSocket, Action<ElementReference, Control> bindControl);
 
         public event NodeCreateEventHandler NodeCreate;
         public event NodeCreatedEventHandler NodeCreated;
@@ -80,10 +80,10 @@ namespace retecs.ReteCs.core
         public void OnNodeRemove(Node node) => NodeRemove?.Invoke(node);
         public void OnNodeRemoved(Node node) => NodeRemoved?.Invoke(node);
         public void OnNodeTranslate(Node node, double x, double y) => NodeTranslate?.Invoke(node, x, y);
-        public void OnTranslateNode(Node node, double dx, double dy) => TranslateNode?.Invoke(node, dx, dy);
+        public void OnTranslateNode(Node node, Point point) => TranslateNode?.Invoke(node, point);
 
-        public void OnNodeTranslated(Node node, double prevX, double prevY) =>
-            NodeTranslated?.Invoke(node, prevX, prevY);
+        public void OnNodeTranslated(Node node, Point prevPoint) =>
+            NodeTranslated?.Invoke(node, prevPoint);
 
         public void OnNodeDragged(Node node) => NodeDragged?.Invoke(node);
         public void OnSelectNode(Node node, bool accumulate) => SelectNode?.Invoke(node, accumulate);
@@ -95,7 +95,7 @@ namespace retecs.ReteCs.core
         public void OnNodeSelected(Node node) => NodeSelected?.Invoke(node);
 
         public void OnRenderNode(ElementReference elementreference, Node node, object componentData,
-            Action bindsocket, Action bindcontrol) =>
+            Action<ElementReference, string, Io> bindsocket, Action<ElementReference, Control> bindcontrol) =>
             RenderNode?.Invoke(elementreference, node, componentData, bindsocket, bindcontrol);
 
         #endregion
@@ -123,13 +123,12 @@ namespace retecs.ReteCs.core
 
         #region Socket
 
-        public delegate void RenderSocketEventHandler(ElementReference elementReference, Socket socket,
-            Input input = null, Output output = null);
+        public delegate void RenderSocketEventHandler(ElementReference elementReference, Socket socket,Io io);
 
         public event RenderSocketEventHandler RenderSocket;
 
-        public void OnRenderSocket(ElementReference elementreference, Socket socket, Input input = null, Output output = null) =>
-            RenderSocket?.Invoke(elementreference, socket, input, output);
+        public void OnRenderSocket(ElementReference elementreference, Socket socket, Io io) =>
+            RenderSocket?.Invoke(elementreference, socket, io);
 
         #endregion
 
@@ -147,19 +146,19 @@ namespace retecs.ReteCs.core
         #region Connection
 
         public delegate void RenderConnectionEventHandler(ElementReference elementReference, Connection connection,
-            List<int> points);
+            (Point, Point) points);
 
         public delegate void UpdateConnectionEventHandler(ElementReference elementReference, Connection connection,
-            List<int> points);
+            (Point, Point) points);
 
         public event RenderConnectionEventHandler RenderConnection;
         public event UpdateConnectionEventHandler UpdateConnection;
 
         // TODO: Add dataType Point
-        public void OnRenderConnection(ElementReference elementReference, Connection connection, List<int> points) =>
+        public void OnRenderConnection(ElementReference elementReference, Connection connection, (Point, Point) points) =>
             RenderConnection?.Invoke(elementReference, connection, points);
 
-        public void OnUpdateConnection(ElementReference elementReference, Connection connection, List<int> points) =>
+        public void OnUpdateConnection(ElementReference elementReference, Connection connection, (Point, Point) points) =>
             UpdateConnection?.Invoke(elementReference, connection, points);
 
         #endregion
@@ -170,11 +169,11 @@ namespace retecs.ReteCs.core
 
         public delegate void KeyUpEventHandler(KeyboardEventArgs keyboardEventArgs);
 
-        public delegate void TranslateEventHandler(Transform transform, int x, int y);
+        public delegate void TranslateEventHandler(Transform transform, double x, double y);
 
         public delegate void TranslatedEventHandler();
 
-        public delegate void ZoomEventHandler(Transform transform, int zoom, ZoomSource zoomSource);
+        public delegate void ZoomEventHandler(Transform transform, double zoom, ZoomSource zoomSource);
 
         public delegate void ZoomedEventHandler(ZoomSource zoomSource);
 
@@ -210,10 +209,10 @@ namespace retecs.ReteCs.core
 
         public void OnKeyDown(KeyboardEventArgs keyboardEventArgs) => KeyDown?.Invoke(keyboardEventArgs);
         public void OnKeyUp(KeyboardEventArgs keyboardEventArgs) => KeyUp?.Invoke(keyboardEventArgs);
-        public void OnTranslate(Transform transform, int x, int y) => Translate?.Invoke(transform, x, y);
+        public void OnTranslate(Transform transform, double x, double y) => Translate?.Invoke(transform, x, y);
         public void OnTranslated() => Translated?.Invoke();
 
-        public void OnZoom(Transform transform, int zoom, ZoomSource zoomSource) =>
+        public void OnZoom(Transform transform, double zoom, ZoomSource zoomSource) =>
             Zoom?.Invoke(transform, zoom, zoomSource);
 
         public void OnZoomed(ZoomSource zoomSource) => Zoomed?.Invoke(zoomSource);

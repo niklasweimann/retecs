@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 using retecs.ReteCs.Enums;
@@ -10,7 +8,7 @@ namespace retecs.ReteCs.View
 {
     public class Area : Emitter
     {
-        public RenderFragment ElRenderFragment { get; set; }
+        public ElementReference ElRenderFragment { get; set; }
         public ElementReference Container { get; set; }
         public Transform Transform { get; set; }
         public Mouse Mouse { get; set; }
@@ -22,22 +20,19 @@ namespace retecs.ReteCs.View
         public Area(ElementReference container)
         {
             Container = container;
-            ElRenderFragment = builder =>
-            {
-                builder.OpenElement(0, "div");
-                // el.style.transformOrigin = '0 0';
-            };
 
-            _zoom = new Zoom(container, ElRenderFragment, 0.1,
-                (delta, ox, oy, source) => { OnZoom(delta, ox, oy, source); });
-            _drag = new Drag(container, (x, y, _) => { OnTranslate(x, y); }, (_) =>  OnStart());
+            /*
+             TODO
+             * const el = this.el = document.createElement('div');
 
-            On(new List<string> {"destroy"}, _ =>
-            {
-                _zoom.Destroy();
-                _drag.Destroy();
-                return true;
-            });
+        this.container = container;
+        el.style.transformOrigin = '0 0';
+             */
+
+            _zoom = new Zoom(container, ElRenderFragment, 0.1, OnZoom);
+            _drag = new Drag(container, (point, _) => { OnTranslate(point); }, _ => OnStart());
+
+            Destroy += HandleDestroy;
 
             //Todo: JSRuntime interop
             //this.container.addEventListener('pointermove', this.pointermove.bind(this));
@@ -71,7 +66,7 @@ namespace retecs.ReteCs.View
             _startPosition = Transform;
         }
 
-        private void OnTranslate(double dx, double dy)
+        private void OnTranslate(Point point)
         {
             if (_zoom.Translating)
             {
@@ -80,21 +75,16 @@ namespace retecs.ReteCs.View
 
             if (_startPosition != null)
             {
-                Translate(_startPosition.X + dx, _startPosition.Y + dy);
+                Translate(_startPosition.X + point.X, _startPosition.Y + point.Y);
             }
         }
 
         private void Translate(double x, double y)
         {
-            // TODO create Type
-            var parameters = new {Transform, x, y};
-            if (!Trigger("translate", parameters))
-            {
-                return;
-            }
+            base.OnTranslate(Transform, x, y);
 
-            Transform.X = parameters.x;
-            Transform.Y = parameters.y;
+            Transform.X = x;
+            Transform.Y = y;
 
             Update();
             OnTranslated();
@@ -109,10 +99,7 @@ namespace retecs.ReteCs.View
         private void Zoom(double transformK, in int ox, in int oy, ZoomSource source)
         {
             var k = Transform.K;
-            if (!Trigger("zoom", Transform, transformK, source))
-            {
-                return;
-            }
+            base.OnZoom(Transform, transformK, source);
 
             var d = (k - transformK) / (k - transformK == 0 ? 1 : k - transformK);
             Transform.K = transformK == 0 ? 1 : transformK;
@@ -123,14 +110,20 @@ namespace retecs.ReteCs.View
             OnZoomed(source);
         }
 
-        public void AppendChild()
+        public void AppendChild(ElementReference connViewHtmlElement)
         {
             throw new NotImplementedException();
         }
 
-        public void RemoveChild()
+        public void RemoveChild(ElementReference connViewHtmlElement)
         {
             throw new NotImplementedException();
+        }
+
+        public void HandleDestroy()
+        {
+            _zoom.Destroy();
+            _drag.Destroy();
         }
     }
 }

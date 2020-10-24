@@ -1,0 +1,61 @@
+﻿@using retecs.RazorUtils
+@using System.Net.Sockets
+@inject NodeService NodeService
+<div @class="@NodeClasses()">
+    <div class="title">@Node.Name</div>
+    <div class="output">
+        @foreach (var output in Node.Outputs.Values)
+        {
+            <div class="output-title">@output.Name</div>
+            <SocketComponent rete-socket Io="@output" Socket="@output.Socket"></SocketComponent>
+        }
+    </div>
+    <div class="control">
+        @foreach (var control in Node.Controls)
+        {
+            <div [rete-control]="@control"></div>
+        }
+    </div>
+    <div class="input">
+        @foreach (var input in Node.Inputs.Values)
+        {
+            <Socket rete-socket [io]="@input" [socket]="@input.Socket"></Socket>
+            @if (!input.ShowControl())
+            {
+                <div class="input-title">@input.Name</div>
+            }
+            else
+            {
+                <div class="input-control" [rete-control]="input.control"></div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    public NodeEditor Editor { get; set; }
+    public Node Node { get; set; }
+    public Action<ElementReference, SocketType, Io> BindSocket { get; set; }
+    public Action<ElementReference, Control> BindControl { get; set; }
+    public List<Input> Inputs => Node.Inputs.Values.ToList();
+    public List<Output> Outputs => Node.Outputs.Values.ToList();
+    public List<Control> Controls => Node.Controls.Values.ToList();
+
+    protected override void OnInitialized()
+    {
+        NodeService.SetBindings(BindSocket, BindControl);
+        //TODO
+        // this.node.update = () => this.cdr.detectChanges();
+        base.OnInitialized();
+    }
+
+    public string NodeClasses()
+    {
+        var classes = new List<string>();
+        if (Editor.Selected.Contains(Node))
+            classes.Add("selected");
+        classes.Add(Node.Name.ToLower());
+        classes.Add("node");
+        return string.Join(" ", classes);
+    }
+}

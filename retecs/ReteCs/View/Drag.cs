@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs.View
 {
@@ -12,9 +13,9 @@ namespace retecs.ReteCs.View
         public Action<MouseEventArgs> OnDrag { get; set; }
         public Action Destroy { get; set; }
 
-        public Action<double, double, MouseEventArgs> OnTranslate { get; set; }
+        public Action<Point, MouseEventArgs> OnTranslate { get; set; }
 
-        public Drag(ElementReference container, Action<double, double, MouseEventArgs> onTranslate,
+        public Drag(ElementReference container, Action<Point, MouseEventArgs> onTranslate,
             Action<MouseEventArgs> onStart, Action<MouseEventArgs> onDrag = null)
         {
             PointerStart = null;
@@ -49,8 +50,9 @@ namespace retecs.ReteCs.View
             OnStart(mouseEventArgs);
         }
 
-        public void Move(MouseEventArgs mouseEventArgs)
+        public void Move(object eventArgs)
         {
+            var mouseEventArgs = (MouseEventArgs) eventArgs;
             if (!PointerStart.HasValue)
             {
                 return;
@@ -65,11 +67,12 @@ namespace retecs.ReteCs.View
             // TODO get getBoundingClientRect via Javascript
             var zoom = 1;
             //var zoom = this.el.getBoundingClientRect().width / this.el.offsetWidth;
-            OnTranslate(deltaX / zoom, deltaY / zoom, mouseEventArgs);
+            OnTranslate(new Point(deltaX / zoom, deltaY / zoom), mouseEventArgs);
         }
 
-        public void Up(MouseEventArgs mouseEventArgs)
+        public void Up(object eventArgs)
         {
+            var mouseEventArgs = (MouseEventArgs) eventArgs;
             if (!PointerStart.HasValue)
             {
                 return;

@@ -239,7 +239,7 @@ namespace retecs.ReteCs.Engine
             }
         }
 
-        private string Process(Data data, string startId, params object[] args)
+        public string ProcessData(Data data, string startId = null, params object[] args)
         {
             if (!ProcessStart() || !Validate(data))
             {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
 using retecs.ReteCs.core;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs.View
 {
@@ -26,7 +27,7 @@ namespace retecs.ReteCs.View
             OnRenderConnection(HtmlElement, connection, GetPoints());
         }
 
-        public ((double X, double Y),(double X, double Y)) GetPoints()
+        public (Point,Point) GetPoints()
         {
             return (OutputNode.GetSocketPosition(Connection.Output), OutputNode.GetSocketPosition(Connection.Input));
         }
