@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using retecs.ReteCs.Entities;
 
@@ -11,10 +12,12 @@ namespace retecs.ReteCs
         public string Id { get; set; }
 
         public Point Position { get; set; }
-        public Dictionary<string, Input> Inputs { get; set; }
-        public Dictionary<string, Output> Outputs { get; set; }
-        public Dictionary<string, Control> Controls { get; set; }
-        public Dictionary<string, object> Data { get; set; }
+        public Dictionary<string, Input> Inputs { get; set; } = new Dictionary<string, Input>();
+        public Dictionary<string, Output> Outputs { get; set; } = new Dictionary<string, Output>();
+        public Dictionary<string, Control> Controls { get; set; } = new Dictionary<string, Control>();
+        public Dictionary<string, object> Data { get; set; } = new Dictionary<string, object>();
+
+        public event Action UpdateEvent;
 
         private static int latestId = 0;
 
@@ -121,7 +124,7 @@ namespace retecs.ReteCs
 
         public void Update()
         {
-            
+            UpdateEvent?.Invoke();
         }
 
         private Dictionary<string, InputData> ReduceIO(Dictionary<string, Input> list) =>

@@ -6,7 +6,7 @@ namespace retecs.ReteCs
 {
     public class Output : Io
     {
-        public Output(string key, string title, Socket socket, bool multiConns) : base(key, title, socket, multiConns)
+        public Output(string key, string title, Socket socket, bool multiConns = false) : base(key, title, socket, multiConns)
         {
             
         }

@@ -1,25 +1,26 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 using retecs.ReteCs.Enums;
-using retecs.ReteCs.JsInterop;
 
 namespace retecs.ReteCs.View
 {
-    public class Area : Emitter
+    public class Area
     {
+        private Emitter Emitter { get; set; }
         public ElementReference ElementReference { get; set; }
         public ElementReference Container { get; }
         public Transform Transform { get; set; }
         public Mouse Mouse { get; set; }
-        public EventInterop EventInterop { get; } = new EventInterop();
 
         private Transform _startPosition;
         private Zoom _zoom;
         private Drag _drag;
 
-        public Area(ElementReference container)
+        public Area(ElementReference container, Emitter emitter)
         {
+            Emitter = emitter;
             Container = container;
 
             /*
@@ -31,11 +32,13 @@ namespace retecs.ReteCs.View
              */
 
             _zoom = new Zoom(container, ElementReference, 0.1, OnZoom);
-            _drag = new Drag(container, (point, _) => { OnTranslate(point); }, _ => OnStart());
+            _drag = new Drag(container, Emitter, (point, _) => { OnTranslate(point); }, _ => OnStart());
 
-            Destroy += HandleDestroy;
-
-            EventInterop.AddEventListener(Container, "pointermove", _ =>  PointerMove());
+            Emitter.Destroy += HandleDestroy;
+            Emitter.WindowMouseMove += (args) =>
+            {
+                PointerMove(args);
+            };
 
             Update();
         }
@@ -47,17 +50,18 @@ namespace retecs.ReteCs.View
             // this.el.style.transform = `translate(${t.x}px, ${t.y}px) scale(${t.k})`;
         }
 
-        public void PointerMove()
+        public void PointerMove(MouseEventArgs mouseEventArgs)
         {
-            var clientX = 0;
-            var clientY = 0;
+            var clientX = mouseEventArgs.ClientX;
+            var clientY = mouseEventArgs.ClientY;
+            // TODO add BoundingClientRect
             var (left, top) = (0, 0);
             var x = clientX - left;
             var y = clientY - top;
             var k = Transform.K;
 
             Mouse = new Mouse(x / k, y / k);
-            OnMouseMove(Mouse);
+            Emitter.OnMouseMove(Mouse);
         }
 
 
@@ -81,13 +85,13 @@ namespace retecs.ReteCs.View
 
         private void Translate(double x, double y)
         {
-            base.OnTranslate(Transform, x, y);
+            Emitter.OnTranslate(Transform, x, y);
 
             Transform.X = x;
             Transform.Y = y;
 
             Update();
-            OnTranslated();
+            Emitter.OnTranslated();
         }
 
         private void OnZoom(double delta, int ox, int oy, ZoomSource source)
@@ -99,7 +103,7 @@ namespace retecs.ReteCs.View
         private void Zoom(double transformK, in int ox, in int oy, ZoomSource source)
         {
             var k = Transform.K;
-            base.OnZoom(Transform, transformK, source);
+            Emitter.OnZoom(Transform, transformK, source);
 
             var d = (k - transformK) / (k - transformK == 0 ? 1 : k - transformK);
             Transform.K = transformK == 0 ? 1 : transformK;
@@ -107,17 +111,17 @@ namespace retecs.ReteCs.View
             Transform.Y += oy * d;
 
             Update();
-            OnZoomed(source);
+            Emitter.OnZoomed(source);
         }
 
         public void AppendChild(ElementReference connViewHtmlElement)
         {
-            EventInterop.AppendChild(ElementReference, connViewHtmlElement);
+            // Destroyed
         }
 
         public void RemoveChild(ElementReference connViewHtmlElement)
         {
-            EventInterop.RemoveChild(ElementReference, connViewHtmlElement);
+            // Destroyed
         }
 
         public void HandleDestroy()

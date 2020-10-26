@@ -4,41 +4,40 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
-using retecs.ReteCs.JsInterop;
 
 namespace retecs.ReteCs.View
 {
-    public class EditorView : Emitter
+    public class EditorView
     {
+        public Emitter Emitter { get; set; }
         public ElementReference Container { get; set; }
         public Dictionary<string, Component> Components { get; set; }
         public Dictionary<Node, NodeView> Nodes { get; } = new Dictionary<Node, NodeView>();
         public Dictionary<Connection, ConnectionView> Connections { get; } = new Dictionary<Connection, ConnectionView>();
         public Area Area { get; set; }
-        public EventInterop EventInterop { get; } = new EventInterop();
 
-        public EditorView(ElementReference container, Dictionary<string, Component> components)
+        public EditorView(ElementReference container, Dictionary<string, Component> components, Emitter emitter)
         {
+            Emitter = emitter;
             Container = container;
             Components = components;
             // TODO
             //this.container.style.overflow = 'hidden';
-            EventInterop.AddEventListener(Container, "click", mouse => Click((MouseEventArgs)mouse));
-            EventInterop.AddEventListener(Container, "contextmenu",
-                eventArgs => OnContextMenu((MouseEventArgs) eventArgs, this));
-
-            Destroy += () =>
+            Emitter.Click += (args, reference) => Click(args);
+            Emitter.WindowContextMenu += args =>  Emitter.OnContextMenu(args);
+            Emitter.WindowResize += Resize;
+            Emitter.Destroy += () =>
             {
-                Utils.ListenWindow("resize", _ => Resize());
+                Emitter.WindowResize -= Resize;
                 foreach (var nodesValue in Nodes.Values)
                 {
                     nodesValue.Destroy();
                 }
             };
 
-            NodeTranslated += UpdateConnections;
-            Area = new Area(container);
-            EventInterop.AppendChild(Container, Area.ElementReference);
+            Emitter.NodeTranslated += UpdateConnections;
+            Area = new Area(container, Emitter);
+            // Destroyed
         }
 
         public void AddNode(Node node)
@@ -48,7 +47,7 @@ namespace retecs.ReteCs.View
             {
                 throw new Exception($"Component {node.Name} not found");
             }
-            var nodeView = new NodeView(node, component);
+            var nodeView = new NodeView(node, component, Emitter);
             Nodes.Add(node, nodeView);
             Area.AppendChild(nodeView.HtmlElement);
         }
@@ -78,7 +77,7 @@ namespace retecs.ReteCs.View
                 throw new Exception($"View node not found for input ({viewInput}) or output ({viewOutput})");
             }
             
-            var connView = new ConnectionView(connection, viewInput, viewOutput);
+            var connView = new ConnectionView(connection, viewInput, viewOutput, Emitter);
             Connections.Add(connection, connView);
             Area.AppendChild(connView.HtmlElement);
         }
@@ -127,7 +126,7 @@ namespace retecs.ReteCs.View
         {
             //ToDO
             //if (container !== e.target) return;
-            OnClick(mouseEventArgs, Container);
+            Emitter.OnClick(mouseEventArgs, Container);
         }
     }
 }

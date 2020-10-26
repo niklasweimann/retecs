@@ -8,8 +8,9 @@ using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs.View
 {
-    public class NodeView : Emitter
+    public class NodeView
     {
+        public Emitter Emitter { get; set; }
         public Node Node { get; set; }
         public Component Component { get; set; }
         public Dictionary<Io, SocketView> Sockets { get; set; }
@@ -19,9 +20,10 @@ namespace retecs.ReteCs.View
         public Point StartPosition { get; set; }
         public Drag Drag { get; set; }
 
-        public NodeView(Node node, Component component)
+        public NodeView(Node node, Component component, Emitter emitter)
         {
             Node = node;
+            Emitter = emitter;
             Component = component;
             //htmlElement = new ElementReference();
             /*
@@ -29,11 +31,11 @@ namespace retecs.ReteCs.View
         this.el.style.position = 'absolute';
              */
             //this.el.addEventListener('contextmenu', e => this.trigger('contextmenu', { e, node: this.node }));
-            Drag = new Drag(HtmlElement, (point, _) => OnTranslate(point), mouseEventArgs => OnSelect(mouseEventArgs), (_) =>
+            Drag = new Drag(HtmlElement, Emitter, (point, _) => OnTranslate(point), mouseEventArgs => OnSelect(mouseEventArgs), (_) =>
             {
-                OnNodeDragged(node);
+                Emitter.OnNodeDragged(node);
             });
-            OnRenderNode(HtmlElement, node, component.Data, (reference, type, io) => BindSocket(reference, type, io),
+            Emitter.OnRenderNode(HtmlElement, node, component.Data, (reference, type, io) => BindSocket(reference, type, io),
                 (reference, control) => BindControl(reference, control));
             Update();
         }
@@ -53,12 +55,12 @@ namespace retecs.ReteCs.View
         public void BindSocket(ElementReference htmlElement, string type, Io io)
         {
             ClearSocket();
-            Sockets.Add(io, new SocketView(htmlElement, type, io, Node));
+            Sockets.Add(io, new SocketView(htmlElement, type, io, Node, Emitter));
         }
 
         public void BindControl(ElementReference htmlElement, Control control)
         {
-            Controls.Add(control, new ControlView(htmlElement, control));
+            Controls.Add(control, new ControlView(htmlElement, control, Emitter));
         }
 
         public Point GetSocketPosition(Io io)
@@ -75,8 +77,8 @@ namespace retecs.ReteCs.View
         public void OnSelect(MouseEventArgs mouseEventArgs)
         {
             OnStart();
-            OnMultiSelectNode(Node, mouseEventArgs.ShiftKey, mouseEventArgs);
-            OnSelectNode(Node, mouseEventArgs.ShiftKey);
+            Emitter.OnMultiSelectNode(Node, mouseEventArgs.ShiftKey, mouseEventArgs);
+            Emitter.OnSelectNode(Node, mouseEventArgs.ShiftKey);
         }
 
         public void OnStart()
@@ -86,7 +88,7 @@ namespace retecs.ReteCs.View
 
         public void OnTranslate(Point point)
         {
-            OnTranslateNode(Node, point);
+            Emitter.OnTranslateNode(Node, point);
         }
 
         public void OnDrag(Point point)
@@ -99,11 +101,11 @@ namespace retecs.ReteCs.View
         public void Translate(double x, double y)
         {
             var param = new {Node, x, y};
-            OnNodeTranslate(Node, x, y);
+            Emitter.OnNodeTranslate(Node, x, y);
             var prev = Node.Position;
             Node.Position = new Point(param.x, param.y);
             Update();
-            OnNodeTranslated(Node, prev);
+            Emitter.OnNodeTranslated(Node, prev);
         }
 
         public void Update()

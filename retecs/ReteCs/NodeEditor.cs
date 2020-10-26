@@ -11,62 +11,67 @@ namespace retecs.ReteCs
     public class NodeEditor: Context
     {
         public List<Node> Nodes { get; set; }
-        public Selected Selected { get; set; }
+        public Selected Selected { get; set; } = new Selected();
         public EditorView View { get; set; }
         public bool Silent { get; set; }
         
-        public NodeEditor(string id, ElementReference container) : base(id)
+        public NodeEditor(string id, ElementReference container, Emitter emitter) : base(id, emitter)
         {
-            View = new EditorView(container, Components);
+            View = new EditorView(container, Components, emitter);
             Nodes = new List<Node>();
 
-            Destroy += () => Utils.ListenWindow("keydown", keydown => OnKeyDown((KeyboardEventArgs) keydown));
-            Destroy += () => Utils.ListenWindow("keyup", keyup => OnKeyUp((KeyboardEventArgs) keyup));
+            Emitter.WindowKeyDown += Emitter.OnKeyDown;
+            Emitter.WindowKeyUp += Emitter.OnKeyUp;
+            Emitter.Destroy += () =>
+            {
+                Emitter.WindowKeyDown -= Emitter.OnKeyDown;
+                Emitter.WindowKeyUp -= Emitter.OnKeyUp;
+            };
 
-            SelectNode += OnSelectNodeEventHandler;
-            NodeSelected += OnNodeSelectedEventHandler;
-            TranslateNode += OnTranslateNodeEventHandler;
+            Emitter.SelectNode += OnSelectNodeEventHandler;
+            Emitter.NodeSelected += OnNodeSelectedEventHandler;
+            Emitter.TranslateNode += OnTranslateNodeEventHandler;
         }
 
         public void AddNode(Node node)
         {
-            OnNodeCreate(node);
+            Emitter.OnNodeCreate(node);
             Nodes.Add(node);
             View.AddNode(node);
-            OnNodeCreated(node);
+            Emitter.OnNodeCreated(node);
         }
 
         public void RemoveNode(Node node)
         {
-            OnNodeRemove(node);
+            Emitter.OnNodeRemove(node);
             node.GetConnections().ForEach(c => RemoveConnection(c));
             Nodes.Remove(node);
             View.RemoveNode(node);
-            OnNodeRemoved(node);
+            Emitter.OnNodeRemoved(node);
         }
 
         public void Connect(Output output, Input input, object data)
         {
-            OnConnectionCreate(input, output);
+            Emitter.OnConnectionCreate(input, output);
             try
             {
                 var con = output.ConnectTo(input);
                 con.Data = data;
                 View.AddConnection(con);
-                OnConnectionCreated(con);
+                Emitter.OnConnectionCreated(con);
             }
             catch (Exception e)
             {
-                OnWarn(e.Message, e);
+                Emitter.OnWarn(e.Message, e);
             }
         }
 
         public void RemoveConnection(Connection connection)
         {
-            OnConnectionRemove(connection);
+            Emitter.OnConnectionRemove(connection);
             View.RemoveConnection(connection);
             connection.Remove();
-            OnConnectionRemoved(connection);
+            Emitter.OnConnectionRemoved(connection);
         }
 
         private void OnSelectNodeEventHandler(Node node, bool accumulate)
@@ -75,9 +80,9 @@ namespace retecs.ReteCs
             {
                 throw new Exception($"Node not exist in list {node.Name}");
             }
-            OnNodeSelect(node);
+            Emitter.OnNodeSelect(node);
             Selected.Add(node, accumulate);
-            OnNodeSelected(node);
+            Emitter.OnNodeSelected(node);
         }
 
         public Component GetComponent(string name)
@@ -95,14 +100,14 @@ namespace retecs.ReteCs
         public void Clear()
         {
             Nodes.ForEach(n => RemoveNode(n));
-            OnClear();
+            Emitter.OnClear();
         }
 
         public Data ToJson()
         {
             var data = new Data();
             Nodes.ForEach(n => data.Nodes[n.Id] = n.ToJson());
-            OnExport(data);
+            Emitter.OnExport(data);
             return data;
         }
 
@@ -111,13 +116,13 @@ namespace retecs.ReteCs
             var (success, message) = Validator.Validate(Id, data);
             if (!success)
             {
-                OnWarn(message);
+                Emitter.OnWarn(message);
                 return false;
             }
 
             Silent = true;
             Clear();
-            OnImport(data);
+            Emitter.OnImport(data);
             return true;
         }
 
@@ -157,7 +162,7 @@ namespace retecs.ReteCs
                             var targetInput = nodes[nodeId].Inputs[con.Input];
                             if (targetInput == null || targetOutput == null)
                             {
-                                OnError($"IO not found for node {node.Id}");
+                                Emitter.OnError($"IO not found for node {node.Id}");
                                 continue;
                             }
                             Connect(targetOutput, targetInput, restoreData);
@@ -168,7 +173,7 @@ namespace retecs.ReteCs
             }
             catch (Exception e)
             {
-                OnWarn(e.Message, e);
+                Emitter.OnWarn(e.Message, e);
                 return !AfterImport();
             }
 

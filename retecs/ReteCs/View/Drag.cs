@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
-using retecs.ReteCs.JsInterop;
 
 namespace retecs.ReteCs.View
 {
@@ -11,14 +10,14 @@ namespace retecs.ReteCs.View
     {
         public Point PointerStart { get; set; }
         public ElementReference HtmlReference { get; }
+        public Emitter Emitter { get; }
         public Action<MouseEventArgs> OnStart { get; }
         public Action<MouseEventArgs> OnDrag { get; }
         public Action Destroy { get; }
-        public EventInterop EventInterop { get; } = new EventInterop();
 
         public Action<Point, MouseEventArgs> OnTranslate { get; }
 
-        public Drag(ElementReference container, Action<Point, MouseEventArgs> onTranslate,
+        public Drag(ElementReference container, Emitter emitter, Action<Point, MouseEventArgs> onTranslate,
             Action<MouseEventArgs> onStart, Action<MouseEventArgs> onDrag = null)
         {
             PointerStart = null;
@@ -26,22 +25,18 @@ namespace retecs.ReteCs.View
             OnDrag = onDrag;
             OnTranslate = onTranslate;
             HtmlReference = container;
+            Emitter = emitter;
             /*
              TODO
             El.style.touchAction = "none";*/
-            EventInterop.AddEventListener(HtmlReference, "pointerdown", mouse =>
-            {
-                Console.WriteLine(JsonSerializer.Serialize((MouseEventArgs)mouse));
-                Down((MouseEventArgs)mouse);
-            });
-
-            var destroyMove = Utils.ListenWindow("pointermove", Move);
-            var destroyUp = Utils.ListenWindow("pointerup", Up);
+            Emitter.WindowMouseDown += Down;
+            Emitter.WindowMouseMove += Move;
+            Emitter.WindowMouseUp += Up;
 
             Destroy = () =>
             {
-                destroyMove();
-                destroyUp();
+                Emitter.WindowMouseMove -= Move;
+                Emitter.WindowMouseUp -= Up;
             };
         }
 
@@ -52,7 +47,6 @@ namespace retecs.ReteCs.View
                 return;
             }
 
-            //TODO stop propagation
             PointerStart = new Point(mouseEventArgs.ClientX, mouseEventArgs.ClientY);
             OnStart(mouseEventArgs);
         }

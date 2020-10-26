@@ -17,13 +17,13 @@ namespace retecs.ReteCs.Engine
         public State State { get; set; } = State.Available;
         public Action OnAbort { get; set; }
 
-        public Engine(string id): base(id)
+        public Engine(string id, Emitter emitter): base(id, emitter)
         {
         }
 
         public Engine Clone()
         {
-            var engine = new Engine(Id);
+            var engine = new Engine(Id, Emitter);
             foreach (var component in Components)
             {
                 engine.Register(component.Value);
@@ -35,7 +35,7 @@ namespace retecs.ReteCs.Engine
         public string ThrowError(string message, object data)
         {
             Abort();
-            base.OnWarn(message, data);
+            Emitter.OnWarn(message, data);
             ProcessDone();
             return "error";
         }
@@ -151,7 +151,7 @@ namespace retecs.ReteCs.Engine
             catch (Exception e)
             {
                 Abort();
-                base.OnWarn(e.Message, e);
+                Emitter.OnWarn(e.Message, e);
             }
 
             return outputData;

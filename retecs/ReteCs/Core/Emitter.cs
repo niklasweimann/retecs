@@ -9,6 +9,8 @@ namespace retecs.ReteCs.core
 {
     public class Emitter
     {
+        #region Internal
+        
         #region Generic
 
         public delegate void WarnEventHandler(string warning, object data);
@@ -228,6 +230,43 @@ namespace retecs.ReteCs.core
         public void OnProcess() => Process?.Invoke();
         public void OnClear() => Clear?.Invoke();
 
+        #endregion
+        #endregion
+
+        #region UiEvents
+
+        #region Window
+        public delegate void ResizeWindowEventHandler();
+        public delegate void KeyDownWindowEventHandler(KeyboardEventArgs keyboardEventArgs);
+        public delegate void KeyUpWindowEventHandler(KeyboardEventArgs keyboardEventArgs);
+        public delegate void MouseMoveWindowEventHandler(MouseEventArgs mouseEventArgs);
+        public delegate void MouseUpWindowEventHandler(MouseEventArgs mouseEventArgs);
+        public delegate void ContextMenuWindowEventHandler(MouseEventArgs mouseEventArgs);
+
+        public delegate void MouseDownWindowEventHandler(MouseEventArgs mouseEventArgs);
+
+        public event ResizeWindowEventHandler WindowResize;
+        public event KeyDownWindowEventHandler WindowKeyDown;
+        public event KeyUpWindowEventHandler WindowKeyUp;
+        public event MouseMoveWindowEventHandler WindowMouseMove;
+        public event MouseUpWindowEventHandler WindowMouseUp;
+        public event MouseDownWindowEventHandler WindowMouseDown;
+        public event ContextMenuWindowEventHandler WindowContextMenu;
+
+        public void OnWindowMouseDown(MouseEventArgs mouseEventArgs) => WindowMouseDown?.Invoke(mouseEventArgs);
+        public void OnWindowResize() =>
+            WindowResize?.Invoke();
+        public void OnWindowContextMenu(MouseEventArgs mouseEventArgs) => WindowContextMenu?.Invoke(mouseEventArgs);
+        public void OnWindowKeyDown(KeyboardEventArgs keyboardEventArgs) =>
+            WindowKeyDown?.Invoke(keyboardEventArgs);
+        public void OnWindowKeyUp(KeyboardEventArgs keyboardEventArgs) =>
+            WindowKeyUp?.Invoke(keyboardEventArgs);
+        public void OnWindowMouseMove(MouseEventArgs mouseEventArgs) =>
+            WindowMouseMove?.Invoke(mouseEventArgs);
+        public void OnWindowMouseUp(MouseEventArgs mouseEventArgs) =>
+            WindowMouseUp?.Invoke(mouseEventArgs);
+        
+        #endregion
         #endregion
     }
 }

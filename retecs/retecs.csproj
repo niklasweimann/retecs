@@ -10,21 +10,18 @@
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Build" Version="3.2.1" PrivateAssets="all" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="3.2.1" PrivateAssets="all" />
         <PackageReference Include="System.Net.Http.Json" Version="3.2.0" />
-        <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.0.3">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
-      <TypeScriptCompile Include="ReteCs\JsInterop\EventInterop.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\FONT-LICENSE" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.eot" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.otf" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.ttf" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.woff" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\ICON-LICENSE" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\open-iconic\README.md" />
     </ItemGroup>
-
-    <PropertyGroup>
-        <TypeScriptOutFile>wwwroot/eventInterop.js</TypeScriptOutFile>
-        <TypeScriptTarget>ES2018</TypeScriptTarget>
-        <TypeScriptAlwaysStrict>true</TypeScriptAlwaysStrict>
-        <TypeScriptInclude>JsInterop\TypeScript\*.ts</TypeScriptInclude>
-    </PropertyGroup>
 
 </Project>

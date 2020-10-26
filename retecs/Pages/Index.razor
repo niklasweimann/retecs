@@ -1,23 +1,4 @@
 ﻿@page "/"
-@using retecs.ReteCs.JsInterop
 @inject IJSRuntime JsRuntime;
 
-<h1 @ref="EleRef">Hello, world!</h1>
-
-Welcome to your new app.
-
-@code
-{
-    ElementReference EleRef;
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            EventInterop.JsRuntime = JsRuntime;
-            new EventInterop().CreateElement(EleRef);
-        }
-        base.OnAfterRender(firstRender);
-    }
-
-    
-}
+<ReteEditor></ReteEditor>

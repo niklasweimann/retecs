@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using retecs.ReteCs.core;
 
 namespace retecs.ReteCs.View
 {
-    public class ControlView : Emitter
+    public class ControlView
     {
-        public ControlView(ElementReference el, ReteCs.Control control)
+        public Emitter Emitter { get; set; }
+        public ControlView(ElementReference el, Control control, Emitter emitter)
         {
-            OnRenderControl(el, control);
+            Emitter = emitter;
+            Emitter.OnRenderControl(el, control);
         }
     }
 }

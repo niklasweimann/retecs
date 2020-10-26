@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace retecs.ReteCs.core
+﻿namespace retecs.ReteCs.core
 {
-    public class Plugin
+    public abstract class Plugin
     {
-        public string Name { get; set; }
-        public Action<object, object> Install { get; set; }
+        public abstract string Name { get; }
+
+        public abstract void Install<T>(Context context, PluginParams<T> pluginParams) where T : Plugin;
     }
 }

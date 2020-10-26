@@ -9,7 +9,7 @@ namespace retecs.ReteCs
         public object Data { get; set; }
         public List<Socket> Compatible { get; set; }
 
-        public Socket(string name, object data)
+        public Socket(string name, object data = null)
         {
             Name = name;
             Data = data;

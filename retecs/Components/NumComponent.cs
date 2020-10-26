@@ -1,13 +1,18 @@
 ﻿using System.Collections.Generic;
+using retecs.RenderPlugin.Entities;
 using retecs.ReteCs;
+using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 
 namespace retecs.Components
 {
-    public class NumComponent : Component
+    public class NumComponent : Component 
     {
-        public NumComponent() : base("Number Input")
+        public Emitter Emitter { get; set; }
+
+        public NumComponent(Emitter emitter) : base("Number Input")
         {
+            Emitter = emitter;
         }
 
         public override void Worker(NodeData node, Dictionary<string, List<WorkerOutput>> inputs, Dictionary<string, WorkerOutput> outputs, params object[] args)
@@ -17,6 +22,8 @@ namespace retecs.Components
 
         public override void Builder(Node node)
         {
+            var out1 = new Output("num", "Number", Sockets.NumberSocket);
+            node.AddControl(new NumControl("num", Emitter)).AddOutput(out1);
         }
     }
 }

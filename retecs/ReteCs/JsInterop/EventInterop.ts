@@ -1,7 +1,7 @@
 ﻿namespace ReteCs {
     class ReteCsInterop {
         public addEventListener(container: HTMLElement, eventName: string, callback: string, objectReference: any) {
-            console.log("Add listener to " + container + "," + eventName)
+            console.log("Add listener to " + (container.innerHTML) + "," + eventName)
             container.addEventListener(eventName, event => this.HandleEvent(event, callback, objectReference));
         }
         
@@ -24,10 +24,9 @@
         public returnEventListener(callback: string, objectReference: any, event: Event) {
             // @ts-ignore
             objectReference.invokeMethodAsync(
-                'retecs.ReteCs.JsInterop.ReturnEventCallback',
                 "ReturnEventCallback",
                 callback,
-                event);
+                this.serializeEvent(event));
         }
         
         public appendChild(parent: HTMLElement, child: HTMLElement){
@@ -38,20 +37,28 @@
             parent.removeChild(child);
         }
 
-        public createElement(element: HTMLElement, objectReference:any) {
-            // create a new div element 
-            const newDiv = document.createElement("div");
-
-            // and give it some content 
-            const newContent = document.createTextNode("Hi there and greetings!");
-
-            // add the text node to the newly created div
-            var ref =  element.appendChild(newContent);
-            
-            objectReference.invokeMethodAsync(
-                'ReturnRefCallback',
-                ref);
-        } 
+         private serializeEvent(e) {
+            if (e) {
+                return {
+                    altKey: e.altKey,
+                    button: e.button,
+                    buttons: e.buttons,
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                    ctrlKey: e.ctrlKey,
+                    metaKey: e.metaKey,
+                    movementX: e.movementX,
+                    movementY: e.movementY,
+                    offsetX: e.offsetX,
+                    offsetY: e.offsetY,
+                    pageX: e.pageX,
+                    pageY: e.pageY,
+                    screenX: e.screenX,
+                    screenY: e.screenY,
+                    shiftKey: e.shiftKey
+                };
+            }
+        };
     }
 
     export function Load(): void {
