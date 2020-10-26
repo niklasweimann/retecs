@@ -1,0 +1,63 @@
+﻿@using retecs.RazorUtils
+@using System.Net.Sockets
+@using retecs.RenderPlugin.Entities
+@inject NodeService NodeService
+
+<div class="@NodeClasses()">
+    <div class="title">@Node.Name</div>
+    <div class="output">
+        @foreach (var output in Node.Outputs.Values)
+        {
+            <div class="output-title">@output.Name</div>
+            <SocketComponent Io="@output" Socket="@output.Socket"></SocketComponent>
+        }
+    </div>
+    <div class="control">
+        @foreach (var control in Node.Controls.Values)
+        {
+            <div class="input-control">
+                <ReteControl Control="@((BlazorControl)control)"></ReteControl>
+            </div>
+        }
+    </div>
+    <div class="input">
+        @foreach (var input in Node.Inputs.Values)
+        {
+            <SocketComponent Io="@input" Socket="@input.Socket"></SocketComponent>
+            @if (!input.ShowControl())
+            {
+                <div class="input-title">@input.Name</div>
+            }
+            else
+            {
+                <ReteControl Control="@((BlazorControl)input.Control)"></ReteControl>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public NodeEditor Editor { get; set; }
+    [Parameter]
+    public Node Node { get; set; }
+    public Action<ElementReference, SocketType, Io> BindSocket { get; set; }
+    public Action<ElementReference, Control> BindControl { get; set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        NodeService.SetBindings(BindSocket, BindControl);
+        Node.UpdateEvent += StateHasChanged;
+    }
+
+    public string NodeClasses()
+    {
+        var classes = new List<string>();
+        if (Editor.Selected.Contains(Node))
+            classes.Add("selected");
+        classes.Add(Node.Name.ToLower());
+        classes.Add("node");
+        return string.Join(" ", classes);
+    }
+}

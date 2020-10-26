@@ -1,0 +1,29 @@
+﻿@using retecs.ReteCs
+@if (Socket != null)
+{
+    <div class="@SocketClasses()" title="@Socket.Name"></div>
+}
+
+@code {
+    [Parameter]
+    public Io Io { get; set; }
+    
+    [Parameter]
+    public Socket Socket { get; set; }
+
+    private string SocketClasses()
+    {
+        var classes = new List<string> {"socket"};
+
+        if (Socket != null)
+        {
+            classes.Add(Socket.Name);
+        }
+
+        if (Io != null)
+        {
+            classes.Add(Io is Input ? "input" : "output");
+        }
+        return string.Join(" ", classes);
+    }
+}

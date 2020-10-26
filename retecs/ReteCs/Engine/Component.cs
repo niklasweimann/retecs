@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using retecs.ReteCs.Interfaces;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs.Engine
 {

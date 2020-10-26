@@ -2,27 +2,28 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using retecs.ReteCs.core;
+using retecs.ReteCs.Entities;
 using retecs.ReteCs.Enums;
-using retecs.ReteCs.Interfaces;
 
 namespace retecs.ReteCs.Engine
 {
-    public class Engine : Context<EventsTypes>
+    public class Engine : Context
     {
         public List<object> Args { get; set; }
         public object Data { get; set; }
         public State State { get; set; } = State.Available;
         public Action OnAbort { get; set; }
 
-        public Engine(string id): base(id, new Dictionary<string, List<Func<object, bool>>>())
+        public Engine(string id, Emitter emitter): base(id, emitter)
         {
         }
 
         public Engine Clone()
         {
-            var engine = new Engine(Id);
+            var engine = new Engine(Id, Emitter);
             foreach (var component in Components)
             {
                 engine.Register(component.Value);
@@ -34,7 +35,7 @@ namespace retecs.ReteCs.Engine
         public string ThrowError(string message, object data)
         {
             Abort();
-            Trigger("error", new {message, data});
+            Emitter.OnWarn(message, data);
             ProcessDone();
             return "error";
         }
@@ -72,19 +73,19 @@ namespace retecs.ReteCs.Engine
 
         public void Abort()
         {
-            if (State == State.Processed)
+            switch (State)
             {
-                State = State.Abort;
-                // TODO: this.onAbort = ret;
-            }
-            else if(State == State.Abort)
-            {
-                OnAbort.Invoke();
-                // TODO: this.onAbort = ret; 
-            }
-            else
-            {
-                //ret();
+                case State.Processed:
+                    State = State.Abort;
+                    //OnAbort = ret;
+                    break;
+                case State.Abort:
+                    OnAbort.Invoke();
+                    //OnAbort = ret; 
+                    break;
+                default:
+                    //ret();
+                    break;
             }
         }
 
@@ -150,7 +151,7 @@ namespace retecs.ReteCs.Engine
             catch (Exception e)
             {
                 Abort();
-                Trigger("warn", e);
+                Emitter.OnWarn(e.Message, e);
             }
 
             return outputData;
@@ -192,7 +193,7 @@ namespace retecs.ReteCs.Engine
 
         public Data Copy(Data data)
         {
-            throw new NotImplementedException();
+            return JsonSerializer.Deserialize<Data>(JsonSerializer.Serialize(data));
         }
 
         public bool Validate(Data data)
@@ -239,7 +240,7 @@ namespace retecs.ReteCs.Engine
             }
         }
 
-        private string Process(Data data, string startId, params object[] args)
+        public string ProcessData(Data data, string startId = null, params object[] args)
         {
             if (!ProcessStart() || !Validate(data))
             {

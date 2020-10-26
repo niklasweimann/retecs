@@ -1,12 +1,10 @@
 using System;
 using System.Net.Http;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Text;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using retecs.RazorUtils;
+using retecs.ReteCs.core;
 
 namespace retecs
 {
@@ -18,8 +16,10 @@ namespace retecs
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddScoped(
-                sp => new HttpClient {BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)});
-
+                _ => new HttpClient {BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)});
+            builder.Services.AddSingleton(new Emitter());
+            builder.Services.AddSingleton<NodeService>();
+            
             await builder.Build().RunAsync();
         }
     }

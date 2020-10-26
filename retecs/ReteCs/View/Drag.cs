@@ -1,26 +1,43 @@
 ﻿using System;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using retecs.ReteCs.core;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs.View
 {
     public class Drag
     {
-        public (int, int) PointerStart { get; set; }
-        public Action Destroy;
-        public HtmlElement El { get; set; }
+        public Point PointerStart { get; set; }
+        public ElementReference HtmlReference { get; }
+        public Emitter Emitter { get; }
+        public Action<MouseEventArgs> OnStart { get; }
+        public Action<MouseEventArgs> OnDrag { get; }
+        public Action Destroy { get; }
 
-        public Drag(ElementReference container, Action<int, int> onTranslate, Action onStart, Action onDrag)
+        public Action<Point, MouseEventArgs> OnTranslate { get; }
+
+        public Drag(ElementReference container, Emitter emitter, Action<Point, MouseEventArgs> onTranslate,
+            Action<MouseEventArgs> onStart, Action<MouseEventArgs> onDrag = null)
         {
             PointerStart = null;
-            El = container;
-            El.style.touchAction = "none";
-            El.addEventListener("pointerdown", this.down.bind(this));
+            OnStart = onStart;
+            OnDrag = onDrag;
+            OnTranslate = onTranslate;
+            HtmlReference = container;
+            Emitter = emitter;
+            /*
+             TODO
+            El.style.touchAction = "none";*/
+            Emitter.WindowMouseDown += Down;
+            Emitter.WindowMouseMove += Move;
+            Emitter.WindowMouseUp += Up;
 
-            var destroyMove = listenWindow('pointermove', this.move.bind(this));
-            var destroyUp = listenWindow('pointerup', this.up.bind(this));
-
-            this.destroy = () => { destroyMove(); destroyUp(); }
+            Destroy = () =>
+            {
+                Emitter.WindowMouseMove -= Move;
+                Emitter.WindowMouseUp -= Up;
+            };
         }
 
         public void Down(MouseEventArgs mouseEventArgs)
@@ -29,6 +46,41 @@ namespace retecs.ReteCs.View
             {
                 return;
             }
+
+            PointerStart = new Point(mouseEventArgs.ClientX, mouseEventArgs.ClientY);
+            OnStart(mouseEventArgs);
+        }
+
+        public void Move(object eventArgs)
+        {
+            var mouseEventArgs = (MouseEventArgs) eventArgs;
+            if (PointerStart == null)
+            {
+                return;
+            }
+
+            var x = mouseEventArgs.ClientX;
+            var y = mouseEventArgs.ClientY;
+
+            var deltaX = x - PointerStart.X;
+            var deltaY = y - PointerStart.Y;
+
+            // TODO get getBoundingClientRect via Javascript
+            var zoom = 1;
+            //var zoom = this.el.getBoundingClientRect().width / this.el.offsetWidth;
+            OnTranslate(new Point(deltaX / zoom, deltaY / zoom), mouseEventArgs);
+        }
+
+        public void Up(object eventArgs)
+        {
+            var mouseEventArgs = (MouseEventArgs) eventArgs;
+            if (PointerStart == null)
+            {
+                return;
+            }
+
+            PointerStart = null;
+            OnDrag(mouseEventArgs);
         }
     }
 }

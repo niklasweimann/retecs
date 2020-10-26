@@ -1,0 +1,81 @@
+﻿@using retecs.ReteCs.Engine
+@using retecs.ReteCs.Entities
+@using Component = retecs.ReteCs.Component
+@using retecs.Components
+@using System.Text.Json
+@using retecs.RenderPlugin
+@using retecs.ReteCs.core
+@inject Emitter Emitter;
+<!--TODO @onresize="@(Editor.Emitter.OnWindowResize)"-->
+<!--TODO Contextmenu-->
+<div class="wrapper"  @onkeydown="@Editor.Emitter.OnWindowKeyDown"
+     @onkeyup="@Editor.Emitter.OnWindowKeyUp" @onmousemove="@Editor.Emitter.OnWindowMouseMove"
+     @onmouseup="@Editor.Emitter.OnWindowMouseUp">
+    <div class="node-editor" style="overflow: hidden; touch-action: none;">
+        @_renderFragment
+    </div>
+</div>
+
+@code {
+    public NodeEditor Editor { get; set; }
+    public Engine Engine { get; set; }
+    ElementReference _containerRef;
+    RenderFragment _renderFragment;
+
+    protected override void OnInitialized()
+    {
+        Editor = new NodeEditor(Guid.NewGuid().ToString(), _containerRef, Emitter);
+        Editor.Use(new BasicRenderer());
+        // editor.use(ConnectionPlugin, { curvature: 0.4 });
+        // editor.use(ContextMenuPlugin);
+        
+        Engine = new Engine(Guid.NewGuid().ToString(), Emitter);
+        var components = new List<Component> {new NumComponent(Emitter)};
+        components.ForEach(component =>
+        {
+            Editor.Register(component);
+            Engine.Register(component);
+        });
+
+        var n1 = components[0].CreateNode(new Dictionary<string, object>
+        {
+            {"num", 2}
+        });
+        n1.Position = new Point(80, 200);
+
+        Editor.Emitter.Process += RequestAnimationFrame;
+        Editor.Emitter.ConnectionCreated += _ => RequestAnimationFrame();
+        Editor.Emitter.ConnectionRemoved += _ => RequestAnimationFrame();
+
+        Editor.View.Resize();
+        var seq = 0;
+        Editor.Emitter.NodeCreated += node =>
+        {
+            _renderFragment += builder =>
+            {
+                builder.OpenComponent<NodeComponent>(++seq);
+                builder.AddAttribute(++seq, "Editor", Editor);
+                builder.AddAttribute(++seq, "Node", node);
+                builder.CloseComponent();
+            };
+        };
+        Editor.Emitter.RenderControl += (_, control) =>
+        {
+            _renderFragment += builder =>
+            {
+                builder.OpenComponent<ReteControl>(++seq);
+                builder.AddAttribute(++seq, "Control", control);
+                builder.CloseComponent();
+            };
+        };
+        base.OnInitialized();
+        Editor.AddNode(n1);
+    }
+
+    public void RequestAnimationFrame()
+    {
+        Engine.Abort();
+        Engine.ProcessData(Editor.ToJson());
+    }
+
+}

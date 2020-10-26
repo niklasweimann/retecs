@@ -10,10 +10,9 @@ namespace retecs.ReteCs.View
         public Action Destroy;
         public PointerEventArgs[] Pointers;
 
-        public Zoom(ElementReference container, RenderFragment elRenderFragment, double d,
+        public Zoom(ElementReference container, ElementReference elRenderFragment, double d,
             Action<double, int, int, ZoomSource> action)
         {
-            throw new NotImplementedException();
         }
 
         public bool Translating => Pointers.Length > 2;

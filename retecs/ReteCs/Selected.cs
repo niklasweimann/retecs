@@ -5,7 +5,7 @@ namespace retecs.ReteCs
 {
     public class Selected
     {
-        private List<Node> List { get; set; }
+        private List<Node> List { get; set; } = new List<Node>();
 
         public void Add(Node item, bool accumulate = false)
         {
