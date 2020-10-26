@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs
 {
@@ -35,26 +34,15 @@ namespace retecs.ReteCs
             return !HasConnection() && Control != null;
         }
 
-        public string ToJson()
+        public InputData ToJson()
         {
-            var res = "connections: [";
-            foreach (var connection in Connections)
+            return new InputData
             {
-                if (connection.Output.Node == null)
+                Connections = Connections?.Select(x => new InputConnectionData
                 {
-                    throw new Exception("Node not added to Output");
-                }
-
-                res += JsonSerializer.Serialize(new
-                {
-                    Node = connection.Output.Node.Id,
-                    Output = connection.Output.Key,
-                    connection.Data
-                });
-            }
-
-            res += "],";
-            return res;
+                    Node = x.Output.Node.Id, Output = x.Output.Key, Data = x.Data
+                }).ToList()
+            };
         }
     }
 }

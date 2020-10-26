@@ -37,6 +37,21 @@
         public removeChild(parent: HTMLElement, child: HTMLElement){
             parent.removeChild(child);
         }
+
+        public createElement(element: HTMLElement, objectReference:any) {
+            // create a new div element 
+            const newDiv = document.createElement("div");
+
+            // and give it some content 
+            const newContent = document.createTextNode("Hi there and greetings!");
+
+            // add the text node to the newly created div
+            var ref =  element.appendChild(newContent);
+            
+            objectReference.invokeMethodAsync(
+                'ReturnRefCallback',
+                ref);
+        } 
     }
 
     export function Load(): void {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -52,6 +53,18 @@ namespace retecs.ReteCs.JsInterop
         public void RemoveChild(ElementReference parentReference, ElementReference childReference)
         {
             JsRuntime.InvokeVoidAsync("ReteCsInterop.removeChild", parentReference, childReference);
+        }
+
+        public void CreateElement(ElementReference elementReference)
+        {
+            JsRuntime.InvokeVoidAsync("ReteCsInterop.createElement", elementReference,
+                DotNetObjectReference.Create(this));
+        }
+        
+        [JSInvokable("ReturnRefCallback")]
+        public void ReturnRefCallback(ElementReference elementReference)
+        {
+            Console.WriteLine(JsonSerializer.Serialize(elementReference));
         }
     }
 }

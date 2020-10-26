@@ -124,14 +124,33 @@ namespace retecs.ReteCs
             
         }
 
+        private Dictionary<string, InputData> ReduceIO(Dictionary<string, Input> list) =>
+            list.ToDictionary(input => input.Key, input => input.Value.ToJson());
+        
+        private Dictionary<string, OutputData> ReduceIO(Dictionary<string, Output> list) =>
+            list.ToDictionary(output => output.Key, output => output.Value.ToJson());
+
         public NodeData ToJson()
         {
-            throw new NotImplementedException();
+            return new NodeData
+            {
+                Id = Id,
+                Data = Data,
+                Inputs = ReduceIO(Inputs),
+                Outputs = ReduceIO(Outputs),
+                Position = Position,
+                Name = Name
+            };
         }
 
-        public static Node FromJson(NodeData node)
+        public static Node FromJson(NodeData nodeData)
         {
-            throw new NotImplementedException();
+            var node = new Node(nodeData.Name)
+            {
+                Position = nodeData.Position, Id = nodeData.Id, Data = nodeData.Data, Name = nodeData.Name
+            };
+            latestId = Math.Max(Convert.ToInt32(node.Id), latestId);
+            return node;
         }
     }
 }

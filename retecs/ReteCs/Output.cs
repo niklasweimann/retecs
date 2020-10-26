@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using retecs.ReteCs.Entities;
 
 namespace retecs.ReteCs
 {
@@ -34,6 +36,17 @@ namespace retecs.ReteCs
             var connection = new Connection(this, input);
             Connections.Add(connection);
             return connection;
+        }
+
+        public OutputData ToJson()
+        {
+            return new OutputData
+            {
+                Connections = Connections?.Select(x => new OutputConnectionData
+                {
+                    Node = x.Input.Node.Id, Input = x.Input.Key, Data = x.Data
+                }).ToList()
+            };
         }
     }
 }

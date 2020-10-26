@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
@@ -192,7 +193,7 @@ namespace retecs.ReteCs.Engine
 
         public Data Copy(Data data)
         {
-            throw new NotImplementedException();
+            return JsonSerializer.Deserialize<Data>(JsonSerializer.Serialize(data));
         }
 
         public bool Validate(Data data)
