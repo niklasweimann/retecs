@@ -8,8 +8,8 @@ namespace retecs.ReteCs
     {
         public Control Control { get; set; }
 
-        public Input(string key, string title, Socket socket, bool multipleConntections) : base(key, title, socket,
-            multipleConntections)
+        public Input(string key, string title, Socket socket, bool multipleConnections = false) : base(key, title, socket,
+            multipleConnections)
         {
 
         }
@@ -23,7 +23,7 @@ namespace retecs.ReteCs
         {
             if (!MultipleConnections && HasConnection())
             {
-                throw new ArgumentException("Multiple Connections not allowed");
+                throw new ArgumentException("Multiple ConnectionViews not allowed");
             }
 
             Connections.Add(connection);

@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Net.Sockets;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.Entities;
 using retecs.ReteCs.Enums;
-using retecs.ReteCs.View;
+using retecs.Shared;
 
 namespace retecs.ReteCs.core
 {
@@ -124,23 +125,23 @@ namespace retecs.ReteCs.core
 
         #region Socket
 
-        public delegate void RenderSocketEventHandler(ElementReference elementReference, Socket socket,Io io);
+        public delegate void RenderSocketEventHandler(Socket socket,Io io);
 
         public event RenderSocketEventHandler RenderSocket;
 
-        public void OnRenderSocket(ElementReference elementreference, Socket socket, Io io) =>
-            RenderSocket?.Invoke(elementreference, socket, io);
+        public void OnRenderSocket(Socket socket, Io io) =>
+            RenderSocket?.Invoke(socket, io);
 
         #endregion
 
         #region Control
 
-        public delegate void RenderControlEventHandler(ElementReference elementReference, Control control);
+        public delegate void RenderControlEventHandler(Control control);
 
         public event RenderControlEventHandler RenderControl;
 
-        public void OnRenderControl(ElementReference elementReference, Control control) =>
-            RenderControl?.Invoke(elementReference, control);
+        public void OnRenderControl(Control control) =>
+            RenderControl?.Invoke(control);
 
         #endregion
 
@@ -181,7 +182,7 @@ namespace retecs.ReteCs.core
 
         public delegate void MousemoveEventHandler(Mouse mouse);
 
-        public delegate void ContextMenuEventHandler(MouseEventArgs mouseEventArgs, EditorView editorView = null,
+        public delegate void ContextMenuEventHandler(MouseEventArgs mouseEventArgs, ReteEditor editorView = null,
             Node node = null);
 
         public delegate void ImportEventHandler(Data data);
@@ -222,7 +223,7 @@ namespace retecs.ReteCs.core
 
         public void OnMouseMove(Mouse mouse) => MouseMove?.Invoke(mouse);
 
-        public void OnContextMenu(MouseEventArgs mouseEventArgs, EditorView editorView = null,
+        public void OnContextMenu(MouseEventArgs mouseEventArgs, ReteEditor editorView = null,
             Node node = null) => ContextMenu?.Invoke(mouseEventArgs, editorView, node);
 
         public void OnImport(Data data) => Import?.Invoke(data);

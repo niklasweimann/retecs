@@ -1,25 +1,32 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Net.Sockets;
+using Microsoft.AspNetCore.Components;
+using retecs.ReteCs;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 
-namespace retecs.ReteCs.View
+namespace retecs.Shared
 {
-    public class SocketView
+    public partial class ReteSocket
     {
         public Emitter Emitter { get; set; }
-        public ElementReference ElementReference { get; set; }
         public string Type { get; set; }
+        [Parameter]
         public Io Io { get; set; }
         public Node Node { get; set; }
 
-        public SocketView(ElementReference elementReference, string type, Io io, Node node, Emitter emitter)
+
+        public ReteSocket()
+        {
+            
+        }
+
+        public ReteSocket(string type, Io io, Node node, Emitter emitter)
         {
             Emitter = emitter;
-            ElementReference = elementReference;
             Type = type;
             Io = io;
             Node = node;
-            Emitter.OnRenderSocket(elementReference, io.Socket, io);
+            Emitter.OnRenderSocket(io.Socket, io);
         }
 
         public Point GetPosition(Point position)

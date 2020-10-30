@@ -5,7 +5,6 @@ namespace retecs.ReteCs
     public abstract class Component : Engine.Component
     {
         public NodeEditor Editor { get; set; }
-        public object Data { get; set; }
 
         protected Component(string name) : base(name)
         {

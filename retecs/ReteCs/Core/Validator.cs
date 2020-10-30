@@ -38,7 +38,7 @@ namespace retecs.ReteCs.core
                 msg.Add("Names don\'t match");
             }
 
-            if (id1[1] != id2[1])
+            if (id1.Length < 2 || id2.Length < 2 || !string.Equals( id1[1], id2[1]))
             {
                 msg.Add("Versions don\'t match");
             }

@@ -7,10 +7,10 @@ namespace retecs.RazorUtils
 {
     public class NodeService
     {
-        public Action<ElementReference, SocketType, Io> BindSocket { get; set; }
+        public Action<string, Io> BindSocket { get; set; }
         public Action<ElementReference, Control> BindControl { get; set; }
 
-        public void SetBindings(Action<ElementReference, SocketType, Io> bindSocket,
+        public void SetBindings(Action<string, Io> bindSocket,
             Action<ElementReference, Control> bindControl)
         {
             BindSocket = bindSocket;
