@@ -2,21 +2,28 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using retecs.ReteCs;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 
-namespace retecs.ReteCs.View
+namespace retecs.Shared
 {
-    public class EditorView
+    public partial class ReteEditor
     {
+        [Inject]
         public Emitter Emitter { get; set; }
         public ElementReference Container { get; set; }
         public Dictionary<string, Component> Components { get; set; }
-        public Dictionary<Node, NodeView> Nodes { get; } = new Dictionary<Node, NodeView>();
-        public Dictionary<Connection, ConnectionView> Connections { get; } = new Dictionary<Connection, ConnectionView>();
-        public Area Area { get; set; }
+        public Dictionary<Node, ReteNode> Nodes { get; } = new Dictionary<Node, ReteNode>();
+        public Dictionary<Connection, ReteConnection> ConnectionViews { get; } = new Dictionary<Connection, ReteConnection>();
+        public ReteArea Area { get; set; }
 
-        public EditorView(ElementReference container, Dictionary<string, Component> components, Emitter emitter)
+        public ReteEditor()
+        {
+            
+        }
+
+        public ReteEditor(ElementReference container, Dictionary<string, Component> components, Emitter emitter)
         {
             Emitter = emitter;
             Container = container;
@@ -29,14 +36,10 @@ namespace retecs.ReteCs.View
             Emitter.Destroy += () =>
             {
                 Emitter.WindowResize -= Resize;
-                foreach (var nodesValue in Nodes.Values)
-                {
-                    nodesValue.Destroy();
-                }
             };
 
             Emitter.NodeTranslated += UpdateConnections;
-            Area = new Area(container, Emitter);
+            Area = new ReteArea(Emitter);
             // Destroyed
         }
 
@@ -47,7 +50,7 @@ namespace retecs.ReteCs.View
             {
                 throw new Exception($"Component {node.Name} not found");
             }
-            var nodeView = new NodeView(node, component, Emitter);
+            var nodeView = new ReteNode(node, component, Emitter);
             Nodes.Add(node, nodeView);
             Area.AppendChild(nodeView.HtmlElement);
         }
@@ -59,7 +62,6 @@ namespace retecs.ReteCs.View
             if (nodeView != null)
             {
                 Area.RemoveChild(nodeView.HtmlElement);
-                nodeView.Destroy();
             }
         }
 
@@ -77,15 +79,15 @@ namespace retecs.ReteCs.View
                 throw new Exception($"View node not found for input ({viewInput}) or output ({viewOutput})");
             }
             
-            var connView = new ConnectionView(connection, viewInput, viewOutput, Emitter);
-            Connections.Add(connection, connView);
+            var connView = new ReteConnection(connection, viewInput, viewOutput, Emitter);
+            ConnectionViews.Add(connection, connView);
             Area.AppendChild(connView.HtmlElement);
         }
 
         public void RemoveConnection(Connection connection)
         {
-            Connections.TryGetValue(connection, out var connView);
-            Connections.Remove(connection);
+            ConnectionViews.TryGetValue(connection, out var connView);
+            ConnectionViews.Remove(connection);
             if (connView != null)
             {
                 Area.RemoveChild(connView.HtmlElement);
@@ -94,12 +96,14 @@ namespace retecs.ReteCs.View
 
         public void UpdateConnections(Node node, Point prevPoint)
         {
-            foreach (var connection in node.GetConnections())
+            var connections = node.GetConnections();
+            foreach (var connection in connections)
             {
-                Connections.TryGetValue(connection, out var connectionView);
+                ConnectionViews.TryGetValue(connection, out var connectionView);
                 if (connectionView == null)
                 {
-                    throw new Exception("Connection view not found");
+                    Emitter.OnWarn("Connection view not found");
+                    continue;
                 }
                 connectionView.Update();
             }
@@ -107,6 +111,7 @@ namespace retecs.ReteCs.View
 
         public void Resize()
         {
+            
             /*
              TODO
              * const { container } = this;

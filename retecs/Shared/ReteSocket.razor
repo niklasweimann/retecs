@@ -1,13 +1,9 @@
-﻿@using retecs.ReteCs
-@if (Socket != null)
+﻿@if (Socket != null)
 {
     <div class="@SocketClasses()" title="@Socket.Name"></div>
 }
 
 @code {
-    [Parameter]
-    public Io Io { get; set; }
-    
     [Parameter]
     public Socket Socket { get; set; }
 

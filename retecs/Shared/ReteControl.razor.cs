@@ -1,12 +1,19 @@
 ﻿using Microsoft.AspNetCore.Components;
+using retecs.ReteCs;
 using retecs.ReteCs.core;
 
-namespace retecs.ReteCs.View
+namespace retecs.Shared
 {
-    public class ControlView
+    public partial class ReteControl
     {
         public Emitter Emitter { get; set; }
-        public ControlView(ElementReference el, Control control, Emitter emitter)
+
+        public ReteControl()
+        {
+            
+        }
+
+        public ReteControl(ElementReference el, Control control, Emitter emitter)
         {
             Emitter = emitter;
             Emitter.OnRenderControl(el, control);

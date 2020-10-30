@@ -19,6 +19,7 @@ namespace retecs
                 _ => new HttpClient {BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)});
             builder.Services.AddSingleton(new Emitter());
             builder.Services.AddSingleton<NodeService>();
+            builder.Services.AddScoped<BrowserService>();
             
             await builder.Build().RunAsync();
         }

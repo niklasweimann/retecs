@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
-using retecs.ReteCs.View;
+using retecs.Shared;
 
 namespace retecs.ReteCs
 {
@@ -12,12 +12,12 @@ namespace retecs.ReteCs
     {
         public List<Node> Nodes { get; set; }
         public Selected Selected { get; set; } = new Selected();
-        public EditorView View { get; set; }
+        public ReteEditor View { get; set; }
         public bool Silent { get; set; }
         
         public NodeEditor(string id, ElementReference container, Emitter emitter) : base(id, emitter)
         {
-            View = new EditorView(container, Components, emitter);
+            View = new ReteEditor(container, Components, emitter);
             Nodes = new List<Node>();
 
             Emitter.WindowKeyDown += Emitter.OnKeyDown;
@@ -50,7 +50,7 @@ namespace retecs.ReteCs
             Emitter.OnNodeRemoved(node);
         }
 
-        public void Connect(Output output, Input input, object data)
+        public void Connect(Output output, Input input, object data = null)
         {
             Emitter.OnConnectionCreate(input, output);
             try
@@ -78,7 +78,8 @@ namespace retecs.ReteCs
         {
             if (!Nodes.Contains(node))
             {
-                throw new Exception($"Node not exist in list {node.Name}");
+                Emitter.OnError($"Node not exist in list {node?.Name}");
+                return;
             }
             Emitter.OnNodeSelect(node);
             Selected.Add(node, accumulate);
@@ -91,7 +92,7 @@ namespace retecs.ReteCs
             return component;
         }
 
-        public void Register(Component component)
+        public new void Register(Component component)
         {
             base.Register(component);
             component.Editor = this;
@@ -185,19 +186,22 @@ namespace retecs.ReteCs
             Selected.Each(n =>
             {
                 View.Nodes.TryGetValue(n, out var nodeView);
-                nodeView?.OnDrag(point);
+                if (nodeView == null)
+                {
+                    Emitter.OnError("Could not find NodeView for Node: " + JsonSerializer.Serialize(node));
+                    return;
+                }
+                nodeView.OnDrag(point);
             });
         }
 
         private void OnNodeSelectedEventHandler(Node node)
         {
-            void Action(Node n)
+            Selected.Each(n =>
             {
                 View.Nodes.TryGetValue(n, out var nodeView);
                 nodeView?.OnStart();
-            }
-
-            Selected.Each(Action);
+            });
         }
     }
 }

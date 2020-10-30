@@ -1,6 +1,6 @@
 ﻿@using retecs.RenderPlugin.Entities
 <div class="input-control">
-    <input type="@Control.Type" value="@Value" readonly="@Readonly"/>
+    <input type="@Control.Type" readonly="@Readonly"/>
 </div>
 
 @code {
@@ -11,14 +11,13 @@
         get => Control.Value;
         set
         {
-            Control.Change();
             Control.Value = value;
+            Control.Change();
         } }
-    
+
     [Parameter]
     public string Type { get; set; }
 
     [Parameter]
     public bool Readonly { get; set; }
-
 }

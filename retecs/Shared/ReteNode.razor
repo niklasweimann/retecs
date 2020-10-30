@@ -1,0 +1,71 @@
+﻿@using retecs.RazorUtils
+@using retecs.RenderPlugin.Entities
+@inject NodeService NodeService
+<div style="transform-origin: 0px 0px; transform: translate(-2px, 0px) scale(1);">
+    <div style="@GetStyle()"
+         @onclick="OnSelect"
+         @onclick:stopPropagation
+         @onpointermove=Move
+         @onpointermove:stopPropagation
+         @onpointerdown=Down
+         @onpointerdown:stopPropagation
+         @onpointerup=Up
+         @onpointerup:stopPropagation
+         @onpointerleave=Leave
+         @onpointerleave:stopPropagation>
+        <div class="@NodeClasses()">
+            <div class="title">@Node.Name</div>
+            <div class="output">
+                @foreach (var output in Node.Outputs.Values)
+                {
+                    <div class="output-title">@output.Name</div>
+                    <ReteSocket Io="@output" Socket="@output.Socket"></ReteSocket>
+                }
+            </div>
+            <div class="control">
+                @foreach (var control in Node.Controls.Values)
+                {
+                    <div class="input-control">
+                        <ReteControl Control="@((BlazorControl) control)"></ReteControl>
+                    </div>
+                }
+            </div>
+            <div class="input">
+                @foreach (var input in Node.Inputs.Values)
+                {
+                    <ReteSocket Io="@input" Socket="@input.Socket"></ReteSocket>
+                    @if (!input.ShowControl())
+                    {
+                        <div class="input-title">@input.Name</div>
+                    }
+                    else
+                    {
+                        <ReteControl Control="@((BlazorControl) input.Control)"></ReteControl>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+
+    private bool _preventRender;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        Node.UpdateEvent += StateHasChanged;
+    }
+
+    protected override bool ShouldRender()
+    {
+        if (!_preventRender)
+        {
+            return true;
+        }
+        _preventRender = false;
+        return false;
+    }
+}

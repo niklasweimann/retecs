@@ -1,15 +1,13 @@
 ﻿using System;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 
-namespace retecs.ReteCs.View
+namespace retecs.Shared
 {
     public class Drag
     {
         public Point PointerStart { get; set; }
-        public ElementReference HtmlReference { get; }
         public Emitter Emitter { get; }
         public Action<MouseEventArgs> OnStart { get; }
         public Action<MouseEventArgs> OnDrag { get; }
@@ -17,18 +15,15 @@ namespace retecs.ReteCs.View
 
         public Action<Point, MouseEventArgs> OnTranslate { get; }
 
-        public Drag(ElementReference container, Emitter emitter, Action<Point, MouseEventArgs> onTranslate,
+        public Drag(Emitter emitter, Action<Point, MouseEventArgs> onTranslate,
             Action<MouseEventArgs> onStart, Action<MouseEventArgs> onDrag = null)
         {
             PointerStart = null;
             OnStart = onStart;
             OnDrag = onDrag;
             OnTranslate = onTranslate;
-            HtmlReference = container;
             Emitter = emitter;
-            /*
-             TODO
-            El.style.touchAction = "none";*/
+
             Emitter.WindowMouseDown += Down;
             Emitter.WindowMouseMove += Move;
             Emitter.WindowMouseUp += Up;
@@ -53,7 +48,7 @@ namespace retecs.ReteCs.View
 
         public void Move(object eventArgs)
         {
-            var mouseEventArgs = (MouseEventArgs) eventArgs;
+            var mouseEventArgs = (MouseEventArgs)eventArgs;
             if (PointerStart == null)
             {
                 return;
@@ -73,7 +68,7 @@ namespace retecs.ReteCs.View
 
         public void Up(object eventArgs)
         {
-            var mouseEventArgs = (MouseEventArgs) eventArgs;
+            var mouseEventArgs = (MouseEventArgs)eventArgs;
             if (PointerStart == null)
             {
                 return;

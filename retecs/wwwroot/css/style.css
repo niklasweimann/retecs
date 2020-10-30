@@ -1,4 +1,15 @@
-﻿.wrapper{
-    width: 100%;
+﻿html {
+    display: block;
     height: 100%;
+    margin: 0;
+}
+body {
+    display: block;
+    height: 100%;
+    margin: 0;
+}
+app {
+    display: block;
+    height: 100%;
+    margin: 0;
 }

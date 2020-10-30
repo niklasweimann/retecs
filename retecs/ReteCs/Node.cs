@@ -112,13 +112,7 @@ namespace retecs.ReteCs
             var ios = new List<Io>();
             ios.AddRange(Inputs.Values);
             ios.AddRange(Outputs.Values);
-            var connections = ios.Aggregate(new List<Connection>(), (arr, io) =>
-            {
-                var list = new List<Connection>();
-                list.AddRange(arr);
-                list.AddRange(io.Connections);
-                return list;
-            });
+            var connections = ios.Distinct().SelectMany(x => x.Connections).ToList();
             return connections;
         }
 

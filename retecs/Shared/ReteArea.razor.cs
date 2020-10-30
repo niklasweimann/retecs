@@ -1,53 +1,53 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 using retecs.ReteCs.Enums;
 
-namespace retecs.ReteCs.View
+namespace retecs.Shared
 {
-    public class Area
+    public partial class ReteArea
     {
+        [Inject]
         private Emitter Emitter { get; set; }
-        public ElementReference ElementReference { get; set; }
-        public ElementReference Container { get; }
-        public Transform Transform { get; set; }
+        public Transform Transform { get; set; } = new Transform();
         public Mouse Mouse { get; set; }
 
         private Transform _startPosition;
-        private Zoom _zoom;
-        private Drag _drag;
 
-        public Area(ElementReference container, Emitter emitter)
+        public ReteArea()
+        {
+            
+        }
+
+        public ReteArea(Emitter emitter)
         {
             Emitter = emitter;
-            Container = container;
 
-            /*
-             TODO
-             * const el = this.el = document.createElement('div');
-
-                this.container = container;
-                el.style.transformOrigin = '0 0';
-             */
-
-            _zoom = new Zoom(container, ElementReference, 0.1, OnZoom);
-            _drag = new Drag(container, Emitter, (point, _) => { OnTranslate(point); }, _ => OnStart());
-
-            Emitter.Destroy += HandleDestroy;
-            Emitter.WindowMouseMove += (args) =>
-            {
-                PointerMove(args);
-            };
+            Emitter.WindowMouseMove += PointerMove;
 
             Update();
         }
 
         public void Update()
         {
-            var t = Transform;
-            //TODO
-            // this.el.style.transform = `translate(${t.x}px, ${t.y}px) scale(${t.k})`;
+            // Transform
+            GetStyles();
+        }
+
+        private string GetStyles()
+        {
+            var classes = new List<string>
+            {
+                "transform-origin: 0px 0px"
+            };
+
+            if (Transform != null)
+            {
+                classes.Add($"transform: translate({Transform.X}px, {Transform.Y}px) scale(1)");
+            }
+            return string.Join("; ", classes);
         }
 
         public void PointerMove(MouseEventArgs mouseEventArgs)
@@ -72,11 +72,6 @@ namespace retecs.ReteCs.View
 
         private void OnTranslate(Point point)
         {
-            if (_zoom.Translating)
-            {
-                return;
-            }
-
             if (_startPosition != null)
             {
                 Translate(_startPosition.X + point.X, _startPosition.Y + point.Y);
@@ -124,10 +119,5 @@ namespace retecs.ReteCs.View
             // Destroyed
         }
 
-        public void HandleDestroy()
-        {
-            _zoom.Destroy();
-            _drag.Destroy();
-        }
     }
 }

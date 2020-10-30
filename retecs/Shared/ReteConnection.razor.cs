@@ -1,18 +1,23 @@
 ﻿using Microsoft.AspNetCore.Components;
+using retecs.ReteCs;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 
-namespace retecs.ReteCs.View
+namespace retecs.Shared
 {
-    public class ConnectionView
+    public partial class ReteConnection
     {
         private Emitter Emitter { get; set; }
         public Connection Connection { get; set; }
-        public NodeView InputNode { get; set; }
-        public NodeView OutputNode { get; set; }
+        public ReteNode InputNode { get; set; }
+        public ReteNode OutputNode { get; set; }
         public ElementReference HtmlElement { get; set; }
 
-        public ConnectionView(Connection connection, NodeView inputNode, NodeView outputNode, Emitter emitter)
+        public ReteConnection()
+        {
+            
+        }
+        public ReteConnection(Connection connection, ReteNode inputNode, ReteNode outputNode, Emitter emitter)
         {
             Connection = connection;
             InputNode = inputNode;

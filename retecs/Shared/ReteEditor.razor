@@ -2,17 +2,15 @@
 @using retecs.ReteCs.Entities
 @using Component = retecs.ReteCs.Component
 @using retecs.Components
-@using System.Text.Json
+@using retecs.RazorUtils
 @using retecs.RenderPlugin
-@using retecs.ReteCs.core
-@inject Emitter Emitter;
-<!--TODO @onresize="@(Editor.Emitter.OnWindowResize)"-->
-<!--TODO Contextmenu-->
-<div class="wrapper"  @onkeydown="@Editor.Emitter.OnWindowKeyDown"
-     @onkeyup="@Editor.Emitter.OnWindowKeyUp" @onmousemove="@Editor.Emitter.OnWindowMouseMove"
-     @onmouseup="@Editor.Emitter.OnWindowMouseUp">
-    <div class="node-editor" style="overflow: hidden; touch-action: none;">
-        @_renderFragment
+@inject BrowserService BrowserService;
+<!--TODO @onresize="@()"-->
+<!--TODO Contextmenu -->
+<div class="wrapper">
+    <div class="node-editor" 
+         style="@Styles">
+        <ReteArea RenderFragment="@_renderFragment"></ReteArea>
     </div>
 </div>
 
@@ -21,16 +19,53 @@
     public Engine Engine { get; set; }
     ElementReference _containerRef;
     RenderFragment _renderFragment;
+    bool _preventRender = false;
+    public string Styles { get; set; }
+    int _innerHeight = 0;
+    int _innerWidth = 0;
+
+    protected string GetStyles()
+    {
+        var dimension = BrowserService.GetDimension();
+        _innerHeight = dimension.Height;
+        _innerWidth = dimension.Width;
+        var classes = new List<string> {"overflow: hidden", "touch-action: none", $"width: {_innerWidth}px", $"height: {_innerHeight}px"};
+        return string.Join("; ", classes);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        Console.WriteLine("Rendered");
+        base.OnAfterRender(firstRender);
+    }
+
+    protected override bool ShouldRender()
+    {
+        if (!_preventRender)
+        {
+            return true;
+        }
+        _preventRender = false;
+        return false;
+    }
 
     protected override void OnInitialized()
     {
         Editor = new NodeEditor(Guid.NewGuid().ToString(), _containerRef, Emitter);
+        Editor.Emitter.WindowKeyDown += _ => Console.WriteLine("WindowKeyDown");
+        Editor.Emitter.WindowKeyUp += _ => Console.WriteLine("WindowKeyUp");
+        Editor.Emitter.WindowMouseMove += _ => Console.WriteLine("WindowMouseMove");
+        Editor.Emitter.WindowMouseUp += _ => Console.WriteLine("WindowMouseUp");
+        Editor.Emitter.Warn += Console.WriteLine;
+        Editor.Emitter.Error += Console.Error.WriteLine;
+
+
         Editor.Use(new BasicRenderer());
         // editor.use(ConnectionPlugin, { curvature: 0.4 });
         // editor.use(ContextMenuPlugin);
-        
+
         Engine = new Engine(Guid.NewGuid().ToString(), Emitter);
-        var components = new List<Component> {new NumComponent(Emitter)};
+        var components = new List<Component> { new NumComponent(Emitter), new NumOutComponent(Emitter) };
         components.ForEach(component =>
         {
             Editor.Register(component);
@@ -38,22 +73,22 @@
         });
 
         var n1 = components[0].CreateNode(new Dictionary<string, object>
-        {
+{
             {"num", 2}
         });
+        var n2 = components[1].CreateNode(new Dictionary<string, object>());
         n1.Position = new Point(80, 200);
-
+        n2.Position = new Point(400, 200);
         Editor.Emitter.Process += RequestAnimationFrame;
         Editor.Emitter.ConnectionCreated += _ => RequestAnimationFrame();
         Editor.Emitter.ConnectionRemoved += _ => RequestAnimationFrame();
 
-        Editor.View.Resize();
         var seq = 0;
         Editor.Emitter.NodeCreated += node =>
         {
             _renderFragment += builder =>
             {
-                builder.OpenComponent<NodeComponent>(++seq);
+                builder.OpenComponent<ReteNode>(++seq);
                 builder.AddAttribute(++seq, "Editor", Editor);
                 builder.AddAttribute(++seq, "Node", node);
                 builder.CloseComponent();
@@ -70,6 +105,9 @@
         };
         base.OnInitialized();
         Editor.AddNode(n1);
+        Editor.AddNode(n2);
+        Editor.Connect(n1.Outputs["num"], n2.Inputs["innum"]);
+        Styles = GetStyles();
     }
 
     public void RequestAnimationFrame()
@@ -77,5 +115,4 @@
         Engine.Abort();
         Engine.ProcessData(Editor.ToJson());
     }
-
 }
