@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using retecs.RenderPlugin.Entities;
 using retecs.ReteCs;
 using retecs.ReteCs.core;
@@ -18,7 +20,8 @@ namespace retecs.Components
 
         public override void Worker(NodeData node, Dictionary<string, List<WorkerOutput>> inputs, Dictionary<string, WorkerOutput> outputs, params object[] args)
         {
-            var input = inputs["num"] ?? new List<WorkerOutput>();
+            Console.WriteLine("NodeInput: " + JsonSerializer.Serialize(inputs));
+            var input = inputs["innum"] ?? new List<WorkerOutput>();
             var ctrl = Editor.Nodes.FirstOrDefault(x => x.Id == node.Id)?.Controls["num"];
             ctrl?.PutData("num", input);
         }
@@ -26,7 +29,10 @@ namespace retecs.Components
         public override void Builder(Node node)
         {
             var in1 = new Input("innum", "Number", Sockets.NumberSocket);
-            node.AddControl(new NumControl("num", Emitter)).AddInput(in1);
+            node.AddControl(new NumControl(Emitter, "num")
+            {
+                Readonly = true
+            }).AddInput(in1);
         }
     }
 }

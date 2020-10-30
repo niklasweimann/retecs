@@ -28,8 +28,6 @@ namespace retecs.Shared
             Emitter = emitter;
             Container = container;
             Components = components;
-            // TODO
-            //this.container.style.overflow = 'hidden';
             Emitter.Click += (args, reference) => Click(args);
             Emitter.WindowContextMenu += args =>  Emitter.OnContextMenu(args);
             Emitter.WindowResize += Resize;
@@ -40,7 +38,6 @@ namespace retecs.Shared
 
             Emitter.NodeTranslated += UpdateConnections;
             Area = new ReteArea(Emitter);
-            // Destroyed
         }
 
         public void AddNode(Node node)
@@ -76,7 +73,8 @@ namespace retecs.Shared
             Nodes.TryGetValue(connection.Output.Node, out var viewOutput);
             if (viewInput == null || viewOutput == null)
             {
-                throw new Exception($"View node not found for input ({viewInput}) or output ({viewOutput})");
+                throw new Exception(
+                    $"View node not found for input ({connection.Input.Node}) or output ({connection.Output.Node})");
             }
             
             var connView = new ReteConnection(connection, viewInput, viewOutput, Emitter);

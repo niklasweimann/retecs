@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using retecs.RenderPlugin.Entities;
 using retecs.ReteCs;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
@@ -23,7 +22,7 @@ namespace retecs.Components
         public override void Builder(Node node)
         {
             var out1 = new Output("num", "Number", Sockets.NumberSocket);
-            node.AddControl(new NumControl("num", Emitter)).AddOutput(out1);
+            node.AddControl(new NumControl(Emitter, "num")).AddOutput(out1);
         }
     }
 }

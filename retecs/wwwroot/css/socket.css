@@ -1,4 +1,5 @@
-﻿:host {
+﻿/* ReSharper disable once CssNotResolved */
+:host {
     display: inline-block;
 }
 

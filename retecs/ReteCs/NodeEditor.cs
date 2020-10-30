@@ -10,7 +10,7 @@ namespace retecs.ReteCs
 {
     public class NodeEditor: Context
     {
-        public List<Node> Nodes { get; set; }
+        public List<Node> Nodes { get; set; } = new List<Node>();
         public Selected Selected { get; set; } = new Selected();
         public ReteEditor View { get; set; }
         public bool Silent { get; set; }
@@ -106,7 +106,11 @@ namespace retecs.ReteCs
 
         public Data ToJson()
         {
-            var data = new Data();
+            var data = new Data
+            {
+                Id = Id,
+                Nodes = new Dictionary<string, NodeData>()
+            };
             Nodes.ForEach(n => data.Nodes[n.Id] = n.ToJson());
             Emitter.OnExport(data);
             return data;
@@ -117,7 +121,7 @@ namespace retecs.ReteCs
             var (success, message) = Validator.Validate(Id, data);
             if (!success)
             {
-                Emitter.OnWarn(message);
+                Emitter.OnError(message);
                 return false;
             }
 

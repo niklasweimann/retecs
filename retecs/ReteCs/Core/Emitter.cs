@@ -136,12 +136,12 @@ namespace retecs.ReteCs.core
 
         #region Control
 
-        public delegate void RenderControlEventHandler(ElementReference elementReference, Control control);
+        public delegate void RenderControlEventHandler(Control control);
 
         public event RenderControlEventHandler RenderControl;
 
-        public void OnRenderControl(ElementReference elementReference, Control control) =>
-            RenderControl?.Invoke(elementReference, control);
+        public void OnRenderControl(Control control) =>
+            RenderControl?.Invoke(control);
 
         #endregion
 

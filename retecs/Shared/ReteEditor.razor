@@ -4,6 +4,7 @@
 @using retecs.Components
 @using retecs.RazorUtils
 @using retecs.RenderPlugin
+@using System.Text.Json
 @inject BrowserService BrowserService;
 <!--TODO @onresize="@()"-->
 <!--TODO Contextmenu -->
@@ -33,12 +34,6 @@
         return string.Join("; ", classes);
     }
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        Console.WriteLine("Rendered");
-        base.OnAfterRender(firstRender);
-    }
-
     protected override bool ShouldRender()
     {
         if (!_preventRender)
@@ -51,20 +46,20 @@
 
     protected override void OnInitialized()
     {
+        base.OnInitialized();
         Editor = new NodeEditor(Guid.NewGuid().ToString(), _containerRef, Emitter);
         Editor.Emitter.WindowKeyDown += _ => Console.WriteLine("WindowKeyDown");
         Editor.Emitter.WindowKeyUp += _ => Console.WriteLine("WindowKeyUp");
         Editor.Emitter.WindowMouseMove += _ => Console.WriteLine("WindowMouseMove");
         Editor.Emitter.WindowMouseUp += _ => Console.WriteLine("WindowMouseUp");
         Editor.Emitter.Warn += Console.WriteLine;
-        Editor.Emitter.Error += Console.Error.WriteLine;
-
+        Editor.Emitter.Error += Console.WriteLine;
 
         Editor.Use(new BasicRenderer());
         // editor.use(ConnectionPlugin, { curvature: 0.4 });
         // editor.use(ContextMenuPlugin);
 
-        Engine = new Engine(Guid.NewGuid().ToString(), Emitter);
+        Engine = new Engine("rete@0.0.1", Emitter);
         var components = new List<Component> { new NumComponent(Emitter), new NumOutComponent(Emitter) };
         components.ForEach(component =>
         {
@@ -73,7 +68,7 @@
         });
 
         var n1 = components[0].CreateNode(new Dictionary<string, object>
-{
+        {
             {"num", 2}
         });
         var n2 = components[1].CreateNode(new Dictionary<string, object>());
@@ -82,6 +77,8 @@
         Editor.Emitter.Process += RequestAnimationFrame;
         Editor.Emitter.ConnectionCreated += _ => RequestAnimationFrame();
         Editor.Emitter.ConnectionRemoved += _ => RequestAnimationFrame();
+        Editor.Emitter.NodeRemoved += _ => RequestAnimationFrame();
+        Editor.Emitter.NodeCreated += _ => RequestAnimationFrame();
 
         var seq = 0;
         Editor.Emitter.NodeCreated += node =>
@@ -94,7 +91,7 @@
                 builder.CloseComponent();
             };
         };
-        Editor.Emitter.RenderControl += (_, control) =>
+        Editor.Emitter.RenderControl += control =>
         {
             _renderFragment += builder =>
             {
@@ -103,11 +100,11 @@
                 builder.CloseComponent();
             };
         };
-        base.OnInitialized();
         Editor.AddNode(n1);
         Editor.AddNode(n2);
         Editor.Connect(n1.Outputs["num"], n2.Inputs["innum"]);
         Styles = GetStyles();
+        Engine.Emitter.OnProcess();
     }
 
     public void RequestAnimationFrame()

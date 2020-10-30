@@ -26,7 +26,7 @@
                 @foreach (var control in Node.Controls.Values)
                 {
                     <div class="input-control">
-                        <ReteControl Control="@((BlazorControl) control)"></ReteControl>
+                        <ReteControl Control="(BlazorControl) control"></ReteControl>
                     </div>
                 }
             </div>
@@ -40,7 +40,7 @@
                     }
                     else
                     {
-                        <ReteControl Control="@((BlazorControl) input.Control)"></ReteControl>
+                        <ReteControl Control="(BlazorControl) input.Control"></ReteControl>
                     }
                 }
             </div>
@@ -49,9 +49,7 @@
 </div>
 
 @code {
-
-
-    private bool _preventRender;
+    //private bool _preventRender;
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -59,13 +57,13 @@
         Node.UpdateEvent += StateHasChanged;
     }
 
-    protected override bool ShouldRender()
-    {
-        if (!_preventRender)
-        {
-            return true;
-        }
-        _preventRender = false;
-        return false;
-    }
+    //protected override bool ShouldRender()
+    //{
+    //    if (!_preventRender)
+    //    {
+    //        return true;
+    //    }
+    //    _preventRender = false;
+    //    return false;
+    //}
 }

@@ -42,7 +42,7 @@ namespace retecs.Shared
             Component = component;
             // todo this.el.addEventListener('contextmenu', e => this.trigger('contextmenu', { e, node: this.node }));
             Emitter.OnRenderNode(HtmlElement, node, component.Data, (reference, type, io) => BindSocket(type, io),
-                (reference, control) => BindControl(reference, control));
+                (reference, control) => BindControl(control));
             UpdateStyle();
         }
 
@@ -64,9 +64,9 @@ namespace retecs.Shared
             Sockets.Add(io, new ReteSocket(type, io, Node, Emitter));
         }
 
-        public void BindControl(ElementReference htmlElement, Control control)
+        public void BindControl(Control control)
         {
-            Controls.Add(control, new ReteControl(htmlElement, control, Emitter));
+            Controls.Add(control, new ReteControl(control, Emitter));
         }
 
         public Point GetSocketPosition(Io io)
@@ -94,7 +94,6 @@ namespace retecs.Shared
 
         public void OnTranslate(Point point)
         {
-            Console.WriteLine(JsonSerializer.Serialize(point));
             Emitter.OnTranslateNode(Node, point);
         }
 
@@ -181,7 +180,6 @@ namespace retecs.Shared
 
         public void Up(MouseEventArgs eventArgs)
         {
-            Console.WriteLine("UP");
             if (PointerStart == null)
             {
                 return;

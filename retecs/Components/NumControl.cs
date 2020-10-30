@@ -1,26 +1,47 @@
-﻿using retecs.RenderPlugin.Entities;
+﻿using System;
+using retecs.RenderPlugin.Entities;
 using retecs.ReteCs.core;
 
 namespace retecs.Components
 {
     public class NumControl : BlazorControl
     {
-        public NumControl(string key, Emitter emitter) : base(key)
+        public NumControl(Emitter emitter, string key, bool @readonly = false) : base(key)
         {
             Emitter = emitter;
             Type = "number";
+            Change = OnChange;
+            Value = 0;
+            Mounted = () =>
+            {
+                SetValue(GetData(key));
+            };
         }
 
-        public void OnChange(int number)
+        public void OnChange(object number)
         {
-            SetValue(number);
-            Emitter.OnProcess();
+            if (!string.Equals("number", Type) || number == null)
+            {
+                return;
+            }
+
+            if(number is int numberValue)
+            {
+                SetValue(numberValue);
+                Emitter.OnProcess();
+            }
         }
 
-        public void SetValue(int number)
+        public void SetValue(object number)
         {
-            Value = number;
-            PutData(Key, number);
+            if (number is int numberValue)
+            {
+                Value = numberValue;
+                PutData(Key, numberValue);
+                return;
+            }
+
+            Emitter.OnError("Input of set value is of the wrong type. Should be int, but was: " + number?.GetType());
         }
     }
 }

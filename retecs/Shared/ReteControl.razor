@@ -1,23 +1,24 @@
 ﻿@using retecs.RenderPlugin.Entities
 <div class="input-control">
-    <input type="@Control.Type" readonly="@Readonly"/>
+    <input type="@Control.Type" value="@Control.Value" @onchange="args => Control.Change(args.Value)" readonly="@Readonly"/>
 </div>
 
 @code {
     [Parameter]
     public BlazorControl Control { get; set; }
 
-    public int Value {
-        get => Control.Value;
-        set
-        {
-            Control.Value = value;
-            Control.Change();
-        } }
+    //public int Value {
+    //    get => Control.Value;
+    //    set => Control.Change(value);
+    //}
 
     [Parameter]
     public string Type { get; set; }
 
     [Parameter]
-    public bool Readonly { get; set; }
+    public bool Readonly {
+        get => Control.Readonly;
+        set => Control.Readonly = value;
+    }
+
 }

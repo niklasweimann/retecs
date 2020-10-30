@@ -11,7 +11,7 @@ namespace retecs.Shared
     {
         [Inject]
         private Emitter Emitter { get; set; }
-        public Transform Transform { get; set; } = new Transform();
+        public Transform Transform { get; } = new Transform();
         public Mouse Mouse { get; set; }
 
         private Transform _startPosition;

@@ -13,7 +13,7 @@ namespace retecs.ReteCs.Engine
     public class Engine : Context
     {
         public List<object> Args { get; set; }
-        public object Data { get; set; }
+        public Data Data { get; set; }
         public State State { get; set; } = State.Available;
         public Action OnAbort { get; set; }
 
@@ -121,7 +121,7 @@ namespace retecs.ReteCs.Engine
                 var connData = new List<WorkerOutput>();
                 foreach (var connection in connections)
                 {
-                    var prevNode = (Data as Data)?.Nodes[connection.Node];
+                    var prevNode = Data?.Nodes[connection.Node];
                     var outputs = ProcessNode(prevNode as EngineNode);
                     if (outputs == null)
                     {
@@ -180,12 +180,19 @@ namespace retecs.ReteCs.Engine
             if (State == State.Abort)
                 return null;
             var res = new List<NodeData>();
-            foreach (var nextNode in node.Outputs.Values.SelectMany(output =>
-                output.Connections.Select(connection => (Data as Data)?.Nodes[connection.Node])))
+            if (node?.Outputs.Values == null)
             {
-                ProcessNode(nextNode as EngineNode);
-                ForwardProcess(nextNode);
-                res.Add(nextNode);
+                return res;
+            }
+
+            foreach (var output in node.Outputs.Values)
+            {
+                foreach (var nextNode in output.Connections.Select(connection => Data?.Nodes[connection.Node]))
+                {
+                    ProcessNode(nextNode as EngineNode);
+                    ForwardProcess(nextNode);
+                    res.Add(nextNode);
+                }
             }
 
             return res;
@@ -202,21 +209,29 @@ namespace retecs.ReteCs.Engine
             var recursion = new Recursion(data.Nodes);
             if (!success)
             {
-                throw new Exception(message);
+                Emitter.OnError(message);
+                return false;
             }
 
             var recurrentNode = recursion.Detect();
             if (recurrentNode != null)
             {
-                throw new Exception("Recursion detected");
+                Emitter.OnError("Recursion detected");
+                return false;
             }
 
             return true;
+
         }
 
         public void ProcessStartNode(string id)
         {
-            var startNode = (Data as Data)?.Nodes[id];
+            if (id == null)
+            {
+                return;
+            }
+
+            var startNode = Data?.Nodes[id];
             if (startNode == null)
             {
                 throw new Exception("Node with such id not found");
@@ -228,7 +243,7 @@ namespace retecs.ReteCs.Engine
 
         private void ProcessUnreachable()
         {
-            var data = Data as Data;
+            var data = Data;
             foreach (var node in data.Nodes.Keys)
             {
                 var currNode = data.Nodes[node] as EngineNode;

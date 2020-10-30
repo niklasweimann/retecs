@@ -23,12 +23,6 @@ namespace retecs.Shared
             InputNode = inputNode;
             OutputNode = outputNode;
             Emitter = emitter;
-            /*
-             TODO
-             * this.el = document.createElement('div');
-        this.el.style.position = 'absolute';
-        this.el.style.zIndex = '-1';
-             */
             Emitter.OnRenderConnection(HtmlElement, connection, GetPoints());
         }
 
