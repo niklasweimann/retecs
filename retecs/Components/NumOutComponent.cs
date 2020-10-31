@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using retecs.RenderPlugin.Entities;
 using retecs.ReteCs;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
@@ -18,12 +17,27 @@ namespace retecs.Components
             Emitter = emitter;
         }
 
-        public override void Worker(NodeData node, Dictionary<string, List<WorkerOutput>> inputs, Dictionary<string, WorkerOutput> outputs, params object[] args)
+        public override void Worker(NodeData node, Dictionary<string, List<object>> inputs, Dictionary<string, object> outputs, params object[] args)
         {
-            Console.WriteLine("NodeInput: " + JsonSerializer.Serialize(inputs));
-            var input = inputs["innum"] ?? new List<WorkerOutput>();
-            var ctrl = Editor.Nodes.FirstOrDefault(x => x.Id == node.Id)?.Controls["num"];
-            ctrl?.PutData("num", input);
+            Emitter.OnInfo("NodeInput: ", inputs);
+            var input = inputs["innum"] ?? new List<object>();
+            var editorNode = Editor.Nodes.FirstOrDefault(x => x.Id == node.Id);
+            if (editorNode == null)
+            {
+                Emitter.OnWarn("Node could not be found. Id was: " + node.Id);
+            }
+            else
+            {
+                const string controlKey = "num";
+                var ctrl = editorNode.Controls[controlKey];
+                if (ctrl == null)
+                {
+                    Emitter.OnWarn($"Control could not be found. Key was: {controlKey}. But Node only has this keys:",
+                        Editor.Nodes.FirstOrDefault(x => x.Id == node.Id)?.Controls.Values.Select(x => x.Key));
+                }
+                ((NumControl)ctrl)?.SetValue(input.FirstOrDefault());
+            }
+            
         }
 
         public override void Builder(Node node)

@@ -14,9 +14,9 @@ namespace retecs.Components
             Emitter = emitter;
         }
 
-        public override void Worker(NodeData node, Dictionary<string, List<WorkerOutput>> inputs, Dictionary<string, WorkerOutput> outputs, params object[] args)
+        public override void Worker(NodeData node, Dictionary<string, List<object>> inputs, Dictionary<string, object> outputs, params object[] args)
         {
-            outputs["num"].Objects["num"] = node.Data["num"];
+            outputs["num"] = node.Data["num"];
         }
 
         public override void Builder(Node node)

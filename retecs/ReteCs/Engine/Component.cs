@@ -15,8 +15,8 @@ namespace retecs.ReteCs.Engine
         }
 
         public abstract void Worker(NodeData node,
-            Dictionary<string, List<WorkerOutput>> inputs,
-            Dictionary<string, WorkerOutput> outputs,
+            Dictionary<string, List<object>> inputs,
+            Dictionary<string, object> outputs,
             params object[] args);
     }
 }

@@ -47,13 +47,22 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        Func<object, string> serialize = data =>
+        {
+            if (data != null)
+            {
+                return "; Data: " + JsonSerializer.Serialize(data);
+            }
+            return "";
+        };
         Editor = new NodeEditor(Guid.NewGuid().ToString(), _containerRef, Emitter);
         Editor.Emitter.WindowKeyDown += _ => Console.WriteLine("WindowKeyDown");
         Editor.Emitter.WindowKeyUp += _ => Console.WriteLine("WindowKeyUp");
         Editor.Emitter.WindowMouseMove += _ => Console.WriteLine("WindowMouseMove");
         Editor.Emitter.WindowMouseUp += _ => Console.WriteLine("WindowMouseUp");
-        Editor.Emitter.Warn += Console.WriteLine;
-        Editor.Emitter.Error += Console.WriteLine;
+        Editor.Emitter.Warn += (warning, data) =>  Console.WriteLine("Warning: " + warning + serialize(data));
+        Editor.Emitter.Error += (error, data) => Console.WriteLine("Error: " + error + serialize(data));
+        Editor.Emitter.Info += (info, data) =>  Console.WriteLine("Info: " + info + serialize(data));
 
         Editor.Use(new BasicRenderer());
         // editor.use(ConnectionPlugin, { curvature: 0.4 });
@@ -110,6 +119,6 @@
     public void RequestAnimationFrame()
     {
         Engine.Abort();
-        Engine.ProcessData(Editor.ToJson());
+        Engine.ProcessData(Editor.ToJson(), "0");
     }
 }

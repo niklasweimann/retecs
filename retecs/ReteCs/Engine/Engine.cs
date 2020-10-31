@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 using retecs.ReteCs.Enums;
@@ -111,18 +109,18 @@ namespace retecs.ReteCs.Engine
             node.Busy = false;
         }
 
-        private Dictionary<string, List<WorkerOutput>> ExtractInputData(NodeData nodeData)
+        private Dictionary<string, List<object>> ExtractInputData(NodeData nodeData)
         {
-            var obj = new Dictionary<string, List<WorkerOutput>>();
+            var obj = new Dictionary<string, List<object>>();
             foreach (var key in nodeData.Inputs.Keys)
             {
                 var input = nodeData.Inputs[key];
                 var connections = input.Connections;
-                var connData = new List<WorkerOutput>();
+                var connData = new List<object>();
                 foreach (var connection in connections)
                 {
                     var prevNode = Data?.Nodes[connection.Node];
-                    var outputs = ProcessNode(prevNode as EngineNode);
+                    var outputs = ProcessNode(new EngineNode(prevNode));
                     if (outputs == null)
                     {
                         Abort();
@@ -139,11 +137,11 @@ namespace retecs.ReteCs.Engine
             return obj;
         }
 
-        private Dictionary<string, WorkerOutput> ProcessWorker(NodeData nodeData)
+        private Dictionary<string, object> ProcessWorker(NodeData nodeData)
         {
             var inputData = ExtractInputData(nodeData);
             var component = Components[nodeData.Name];
-            var outputData = new Dictionary<string, WorkerOutput>();
+            var outputData = new Dictionary<string, object>();
             try
             {
                 component.Worker(nodeData, inputData, outputData, Args);
@@ -157,10 +155,11 @@ namespace retecs.ReteCs.Engine
             return outputData;
         }
 
-        private Dictionary<string, WorkerOutput> ProcessNode(EngineNode node)
+        private Dictionary<string, object> ProcessNode(EngineNode node)
         {
             if (State == State.Abort || node == null)
             {
+                Emitter.OnWarn($"Engine has State {State} {(node == null ? "and node was null: " : "")}Stop processing");
                 return null;
             }
             
@@ -182,6 +181,7 @@ namespace retecs.ReteCs.Engine
             var res = new List<NodeData>();
             if (node?.Outputs.Values == null)
             {
+                Emitter.OnInfo($"{node.Name}({node.Id}) has no outputs");
                 return res;
             }
 
@@ -189,7 +189,7 @@ namespace retecs.ReteCs.Engine
             {
                 foreach (var nextNode in output.Connections.Select(connection => Data?.Nodes[connection.Node]))
                 {
-                    ProcessNode(nextNode as EngineNode);
+                    ProcessNode(new EngineNode(nextNode));
                     ForwardProcess(nextNode);
                     res.Add(nextNode);
                 }
@@ -226,6 +226,7 @@ namespace retecs.ReteCs.Engine
 
         public void ProcessStartNode(string id)
         {
+            Emitter.OnInfo($"Start processing start node (Id: {id})");
             if (id == null)
             {
                 return;
@@ -234,10 +235,17 @@ namespace retecs.ReteCs.Engine
             var startNode = Data?.Nodes[id];
             if (startNode == null)
             {
-                throw new Exception("Node with such id not found");
+                Emitter.OnError("No node with this id was found");
+                return;
             }
 
-            ProcessNode(startNode as EngineNode);
+            Emitter.OnInfo($"Start Processing Node(\"{startNode.Name}\" (Id: {startNode.Id}))");
+
+            var engineNode = new EngineNode(startNode);
+            Emitter.OnInfo("EngineNode: " + JsonSerializer.Serialize(engineNode));
+            ProcessNode(engineNode);
+
+            Emitter.OnInfo("ForwardProcess");
             ForwardProcess(startNode);
         }
 
@@ -246,7 +254,7 @@ namespace retecs.ReteCs.Engine
             var data = Data;
             foreach (var node in data.Nodes.Keys)
             {
-                var currNode = data.Nodes[node] as EngineNode;
+                var currNode = new EngineNode(data.Nodes[node]);
                 if (currNode?.OutputData == null)
                 {
                     ProcessNode(currNode);
@@ -257,14 +265,18 @@ namespace retecs.ReteCs.Engine
 
         public string ProcessData(Data data, string startId = null, params object[] args)
         {
+            Emitter.OnInfo("Start validating nodeeditor data");
             if (!ProcessStart() || !Validate(data))
             {
                 return null;
             }
 
+            Emitter.OnInfo("Data is valid");
             Data = data;
             Args = args.ToList();
             ProcessStartNode(startId);
+
+            Emitter.OnInfo("Process unreachable Nodes.");
             ProcessUnreachable();
             return ProcessDone() ? "sucess" : "aborted";
         }

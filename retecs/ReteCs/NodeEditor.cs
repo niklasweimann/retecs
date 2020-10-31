@@ -62,7 +62,7 @@ namespace retecs.ReteCs
             }
             catch (Exception e)
             {
-                Emitter.OnWarn(e.Message, e);
+                Emitter.OnWarn("Exception: "+ e.Message, e.InnerException?.Message);
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using retecs.RenderPlugin.Entities;
 using retecs.ReteCs.core;
 
@@ -6,12 +7,12 @@ namespace retecs.Components
 {
     public class NumControl : BlazorControl
     {
-        public NumControl(Emitter emitter, string key, bool @readonly = false) : base(key)
+        public NumControl(Emitter emitter, string key, bool @readonly = false) : base(key, emitter)
         {
-            Emitter = emitter;
             Type = "number";
-            Change = OnChange;
+            ChangeHandler = OnChange;
             Value = 0;
+            Readonly = @readonly;
             Mounted = () =>
             {
                 SetValue(GetData(key));
@@ -20,28 +21,24 @@ namespace retecs.Components
 
         public void OnChange(object number)
         {
-            if (!string.Equals("number", Type) || number == null)
+            if (long.TryParse((string)number, out var numberValue))
             {
-                return;
-            }
-
-            if(number is int numberValue)
-            {
+                Emitter.OnInfo("Changing Value to: " + numberValue);
                 SetValue(numberValue);
                 Emitter.OnProcess();
+            }
+            else
+            {
+                Emitter.OnWarn(nameof(OnChange) + " was called with a value that can not be converted to int.");
+                Emitter.OnWarn("Value was: " + JsonSerializer.Serialize(new {number}));
             }
         }
 
         public void SetValue(object number)
         {
-            if (number is int numberValue)
-            {
-                Value = numberValue;
-                PutData(Key, numberValue);
-                return;
-            }
-
-            Emitter.OnError("Input of set value is of the wrong type. Should be int, but was: " + number?.GetType());
+            Emitter.OnInfo("Write: " + number + "; To: " + Key);
+            Value = number;
+            PutData(Key, number);
         }
     }
 }

@@ -17,17 +17,20 @@ namespace retecs.ReteCs.core
         public delegate void WarnEventHandler(string warning, object data);
 
         public delegate void ErrorEventHandler(string error, object data);
+        public delegate void InfoEventHandler(string info, object data);
 
         public delegate void ComponentRegisterEventHandler(Component component);
 
         public delegate void DestroyEventHandler();
 
+        public event InfoEventHandler Info;
         public event WarnEventHandler Warn;
         public event ErrorEventHandler Error;
         public event ComponentRegisterEventHandler ComponentRegister;
         public event DestroyEventHandler Destroy;
 
         public void OnWarn(string warn, object data = null) => Warn?.Invoke(warn, data);
+        public void OnInfo(string info, object data = null) => Warn?.Invoke(info, data);
         public void OnError(string error, object data = null) => Error?.Invoke(error, data);
         public void OnComponentRegister(Component component) => ComponentRegister?.Invoke(component);
         public void OnDestroy() => Destroy?.Invoke();

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json;
+using retecs.ReteCs.core;
 
 namespace retecs.ReteCs
 {
@@ -8,8 +10,10 @@ namespace retecs.ReteCs
         public object Data { get; set; }
         public Node ParentNode { get; set; }
         public Input ParentInput { get; set; }
+        public Emitter Emitter { get; set; }
 
-        public Control(string key)
+
+        public Control(string key, Emitter emitter)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -17,6 +21,7 @@ namespace retecs.ReteCs
             }
 
             Key = key;
+            Emitter = emitter;
         }
 
         public Node GetNode()
@@ -36,7 +41,10 @@ namespace retecs.ReteCs
 
         public void PutData(string key, object data)
         {
-            GetNode().Data[key] = data;
+            var node = GetNode();
+            Emitter.OnInfo($"Writing to Node: {node.Name} with ID: {node.Id}");
+            node.Data[key] = data;
+            Emitter.OnInfo($"Value {JsonSerializer.Serialize(node.Data[key])} has been written to {key} ");
         }
     }
 }
