@@ -108,16 +108,5 @@ namespace retecs.Shared
             Update();
             Emitter.OnZoomed(source);
         }
-
-        public void AppendChild(ElementReference connViewHtmlElement)
-        {
-            // Destroyed
-        }
-
-        public void RemoveChild(ElementReference connViewHtmlElement)
-        {
-            // Destroyed
-        }
-
     }
 }

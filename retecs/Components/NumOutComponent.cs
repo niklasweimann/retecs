@@ -20,29 +20,35 @@ namespace retecs.Components
         public override void Worker(NodeData node, Dictionary<string, List<object>> inputs, Dictionary<string, object> outputs, params object[] args)
         {
             Emitter.OnInfo("NodeInput: ", inputs);
-            var input = inputs["innum"] ?? new List<object>();
+            var input = inputs["innum"];
+            node.Data.TryGetValue("innum", out var nodeData);
             var editorNode = Editor.Nodes.FirstOrDefault(x => x.Id == node.Id);
             if (editorNode == null)
             {
                 Emitter.OnWarn("Node could not be found. Id was: " + node.Id);
+                return;
             }
-            else
+
+            const string controlKey = "num";
+            var ctrl = editorNode.Controls[controlKey];
+            Emitter.OnError("bla", node.Data);
+            if (input != null && input.Any())
             {
-                const string controlKey = "num";
-                var ctrl = editorNode.Controls[controlKey];
-                if (ctrl == null)
-                {
-                    Emitter.OnWarn($"Control could not be found. Key was: {controlKey}. But Node only has this keys:",
-                        Editor.Nodes.FirstOrDefault(x => x.Id == node.Id)?.Controls.Values.Select(x => x.Key));
-                }
                 ((NumControl)ctrl)?.SetValue(input.FirstOrDefault());
             }
-            
+            else if (nodeData != null)
+            {
+                Emitter.OnError("bla12", nodeData);
+
+                ((NumControl)ctrl)?.SetValue(nodeData);
+            }
+
         }
 
         public override void Builder(Node node)
         {
             var in1 = new Input("innum", "Number", Sockets.NumberSocket);
+            in1.AddControl(new NumControl(Emitter, "innum"));
             node.AddControl(new NumControl(Emitter, "num")
             {
                 Readonly = true

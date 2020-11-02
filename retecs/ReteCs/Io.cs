@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace retecs.ReteCs
 {
@@ -24,6 +25,11 @@ namespace retecs.ReteCs
         public void RemoveConnection(Connection connection)
         {
             Connections.Remove(connection);
+        }
+
+        public bool HasConnection()
+        {
+            return Connections.Any();
         }
 
         public void RemoveAllConnections()

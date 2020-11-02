@@ -21,17 +21,22 @@ namespace retecs.Components
 
         public void OnChange(object number)
         {
+            Emitter.OnInfo("OnChange was called with ", number);
+
             if (long.TryParse((string)number, out var numberValue))
             {
                 Emitter.OnInfo("Changing Value to: " + numberValue);
                 SetValue(numberValue);
-                Emitter.OnProcess();
             }
             else
             {
                 Emitter.OnWarn(nameof(OnChange) + " was called with a value that can not be converted to int.");
                 Emitter.OnWarn("Value was: " + JsonSerializer.Serialize(new {number}));
             }
+
+            Emitter.OnInfo("Recalculating nodes, because a Control has a new value:", number);
+            Emitter.OnProcess();
+            Emitter.OnInfo("Recalculating nodes done!");
         }
 
         public void SetValue(object number)

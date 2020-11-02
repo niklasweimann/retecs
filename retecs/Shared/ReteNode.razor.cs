@@ -24,7 +24,6 @@ namespace retecs.Shared
         public Dictionary<Io, ReteSocket> Sockets { get; set; }
         public Dictionary<Control, ReteControl> Controls { get; set; }
 
-        public ElementReference HtmlElement { get; set; }
         public Point StartPosition { get; set; }
 
         public List<string> Styles { get; set; } = new List<string>();
@@ -41,7 +40,7 @@ namespace retecs.Shared
             Emitter = emitter;
             Component = component;
             // todo this.el.addEventListener('contextmenu', e => this.trigger('contextmenu', { e, node: this.node }));
-            Emitter.OnRenderNode(HtmlElement, node, component.Data, (reference, type, io) => BindSocket(type, io),
+            Emitter.OnRenderNode(node, component.Data, (reference, type, io) => BindSocket(type, io),
                 (reference, control) => BindControl(control));
             UpdateStyle();
         }

@@ -3,7 +3,7 @@ using retecs.ReteCs.core;
 
 namespace retecs.RenderPlugin
 {
-    public class BasicRenderer : Plugin
+    public class BasicRenderer : ReteCs.core.Plugin
     {
         public override string Name { get; } = "BasicRenderer";
         public Context Context { get; set; }

@@ -2,9 +2,11 @@
 @using retecs.ReteCs.Entities
 @using Component = retecs.ReteCs.Component
 @using retecs.Components
-@using retecs.RazorUtils
 @using retecs.RenderPlugin
 @using System.Text.Json
+@using retecs.BlazorServices
+@using retecs.Plugin.Connection
+@using retecs.ReteCs.core
 @inject BrowserService BrowserService;
 <!--TODO @onresize="@()"-->
 <!--TODO Contextmenu -->
@@ -34,16 +36,6 @@
         return string.Join("; ", classes);
     }
 
-    protected override bool ShouldRender()
-    {
-        if (!_preventRender)
-        {
-            return true;
-        }
-        _preventRender = false;
-        return false;
-    }
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -65,7 +57,7 @@
         Editor.Emitter.Info += (info, data) =>  Console.WriteLine("Info: " + info + serialize(data));
 
         Editor.Use(new BasicRenderer());
-        // editor.use(ConnectionPlugin, { curvature: 0.4 });
+        Editor.Use(new ConnectionBasePlugin());
         // editor.use(ContextMenuPlugin);
 
         Engine = new Engine("rete@0.0.1", Emitter);
@@ -109,6 +101,15 @@
                 builder.CloseComponent();
             };
         };
+        Editor.Emitter.ConnectionCreated += (connection) =>
+        {
+            _renderFragment += builder =>
+            {
+                builder.OpenComponent<ReteConnection>(++seq);
+                builder.AddAttribute(++seq, nameof(ReteConnection.Connection), connection);
+                builder.CloseComponent();
+            };
+        };
         Editor.AddNode(n1);
         Editor.AddNode(n2);
         Editor.Connect(n1.Outputs["num"], n2.Inputs["innum"]);
@@ -120,5 +121,6 @@
     {
         Engine.Abort();
         Engine.ProcessData(Editor.ToJson(), "0");
+        Emitter.OnUpdateState();
     }
 }

@@ -49,17 +49,11 @@ namespace retecs.Shared
             }
             var nodeView = new ReteNode(node, component, Emitter);
             Nodes.Add(node, nodeView);
-            Area.AppendChild(nodeView.HtmlElement);
         }
 
         public void RemoveNode(Node node)
         {
-            Nodes.TryGetValue(node, out var nodeView);
             Nodes.Remove(node);
-            if (nodeView != null)
-            {
-                Area.RemoveChild(nodeView.HtmlElement);
-            }
         }
 
         public void AddConnection(Connection connection)
@@ -76,20 +70,13 @@ namespace retecs.Shared
                 throw new Exception(
                     $"View node not found for input ({connection.Input.Node}) or output ({connection.Output.Node})");
             }
-            
             var connView = new ReteConnection(connection, viewInput, viewOutput, Emitter);
             ConnectionViews.Add(connection, connView);
-            Area.AppendChild(connView.HtmlElement);
         }
 
         public void RemoveConnection(Connection connection)
         {
-            ConnectionViews.TryGetValue(connection, out var connView);
             ConnectionViews.Remove(connection);
-            if (connView != null)
-            {
-                Area.RemoveChild(connView.HtmlElement);
-            }
         }
 
         public void UpdateConnections(Node node, Point prevPoint)

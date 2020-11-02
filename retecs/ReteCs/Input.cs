@@ -29,6 +29,12 @@ namespace retecs.ReteCs
             Connections.Add(connection);
         }
 
+        public void AddControl(Control control)
+        {
+            Control = control;
+            control.ParentInput = this;
+        }
+
         public bool ShowControl()
         {
             return !HasConnection() && Control != null;

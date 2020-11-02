@@ -11,9 +11,9 @@ namespace retecs.ReteCs
             
         }
 
-        public bool HasConnection()
+        public bool ConnectedTo(Input input)
         {
-            return Connections.Count > 0;
+            return Connections.Any(x => x.Input == input);
         }
 
         public Connection ConnectTo(Input input)

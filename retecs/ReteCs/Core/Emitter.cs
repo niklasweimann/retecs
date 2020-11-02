@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Sockets;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs.Entities;
@@ -8,7 +7,7 @@ using retecs.Shared;
 
 namespace retecs.ReteCs.core
 {
-    public class Emitter
+    public partial class Emitter
     {
         #region Internal
         
@@ -23,17 +22,21 @@ namespace retecs.ReteCs.core
 
         public delegate void DestroyEventHandler();
 
+        public delegate void UpdateStateEventHandler();
+
         public event InfoEventHandler Info;
         public event WarnEventHandler Warn;
         public event ErrorEventHandler Error;
         public event ComponentRegisterEventHandler ComponentRegister;
         public event DestroyEventHandler Destroy;
+        public event UpdateStateEventHandler UpdateState;
 
         public void OnWarn(string warn, object data = null) => Warn?.Invoke(warn, data);
-        public void OnInfo(string info, object data = null) => Warn?.Invoke(info, data);
+        public void OnInfo(string info, object data = null) => Info?.Invoke(info, data);
         public void OnError(string error, object data = null) => Error?.Invoke(error, data);
         public void OnComponentRegister(Component component) => ComponentRegister?.Invoke(component);
         public void OnDestroy() => Destroy?.Invoke();
+        public void OnUpdateState() => UpdateState?.Invoke();
 
         #endregion
 
@@ -63,7 +66,7 @@ namespace retecs.ReteCs.core
 
         public delegate void NodeSelectedEventHandler(Node node);
 
-        public delegate void RenderNodeEventHandler(ElementReference elementReference, Node node, object componentData,
+        public delegate void RenderNodeEventHandler(Node node, object componentData,
             Action<ElementReference, string, Io> bindSocket, Action<ElementReference, Control> bindControl);
 
         public event NodeCreateEventHandler NodeCreate;
@@ -99,9 +102,9 @@ namespace retecs.ReteCs.core
         public void OnNodeSelect(Node node) => NodeSelect?.Invoke(node);
         public void OnNodeSelected(Node node) => NodeSelected?.Invoke(node);
 
-        public void OnRenderNode(ElementReference elementreference, Node node, object componentData,
+        public void OnRenderNode(Node node, object componentData,
             Action<ElementReference, string, Io> bindsocket, Action<ElementReference, Control> bindcontrol) =>
-            RenderNode?.Invoke(elementreference, node, componentData, bindsocket, bindcontrol);
+            RenderNode?.Invoke(node, componentData, bindsocket, bindcontrol);
 
         #endregion
 
@@ -150,20 +153,38 @@ namespace retecs.ReteCs.core
 
         #region Connection
 
-        public delegate void RenderConnectionEventHandler(ElementReference elementReference, Connection connection,
-            (Point, Point) points);
+        public delegate void RenderConnectionEventHandler(Connection connection, Input input, Output output);
 
-        public delegate void UpdateConnectionEventHandler(ElementReference elementReference, Connection connection,
-            (Point, Point) points);
+        public delegate void UpdateConnectionEventHandler(Connection connection, (Point, Point) points);
 
         public event RenderConnectionEventHandler RenderConnection;
         public event UpdateConnectionEventHandler UpdateConnection;
 
-        public void OnRenderConnection(ElementReference elementReference, Connection connection, (Point, Point) points) =>
-            RenderConnection?.Invoke(elementReference, connection, points);
+        public void OnRenderConnection(Connection connection, Input input, Output output) =>
+            RenderConnection?.Invoke(connection, input, output);
 
-        public void OnUpdateConnection(ElementReference elementReference, Connection connection, (Point, Point) points) =>
-            UpdateConnection?.Invoke(elementReference, connection, points);
+        public void OnUpdateConnection(Connection connection, (Point, Point) points) =>
+            UpdateConnection?.Invoke(connection, points);
+
+        #region ConnectionPlugin
+
+        public delegate void ConnectionPathEventHandler((Point start, Point end) points, Connection connection, string d);
+        public delegate void ConnectionDropEventHandler(Io io);
+        public delegate void ConnectionPickEventHandler(Io io);
+        public delegate void ResetConnectionEventHandler();
+
+        public event ConnectionPathEventHandler ConnectionPath;
+        public event ConnectionDropEventHandler ConnectionDrop;
+        public event ConnectionPickEventHandler ConnectionPick;
+        public event ResetConnectionEventHandler ResetConnection;
+
+        public void OnConnectionPath((Point start, Point end) points, Connection connection, string d) =>
+            ConnectionPath?.Invoke(points, connection, d);
+        public void OnConnectionDrop(Io io) => ConnectionDrop?.Invoke(io);
+        public void OnConnectionPick(Io io) => ConnectionPick?.Invoke(io);
+        public void OnResetConnection() => ResetConnection?.Invoke();
+
+        #endregion
 
         #endregion
 

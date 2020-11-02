@@ -1,6 +1,10 @@
 ﻿@using retecs.RenderPlugin.Entities
 <div class="input-control">
-    <input type="@Control.Type" value="@Control.Value" @oninput="args => Control.ChangeHandler(args.Value)" readonly="@Readonly"/>
+    <input type="@Control.Type" 
+           value="@Control.Value"
+           @oninput="args => Control.ChangeHandler(args.Value)"
+           @onchange="args => Control.ChangeHandler(args.Value)"
+           readonly="@Readonly"/>
 </div>
 
 @code {
@@ -15,5 +19,4 @@
         get => Control.Readonly;
         set => Control.Readonly = value;
     }
-
 }

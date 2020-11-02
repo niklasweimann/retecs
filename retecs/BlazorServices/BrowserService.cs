@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace retecs.RazorUtils
+namespace retecs.BlazorServices
 {
     public class BrowserService
     {

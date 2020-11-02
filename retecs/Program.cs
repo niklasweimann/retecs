@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using retecs.RazorUtils;
+using retecs.BlazorServices;
 using retecs.ReteCs.core;
 
 namespace retecs
@@ -18,8 +18,8 @@ namespace retecs
             builder.Services.AddScoped(
                 _ => new HttpClient {BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)});
             builder.Services.AddSingleton(new Emitter());
-            builder.Services.AddSingleton<NodeService>();
-            builder.Services.AddScoped<BrowserService>();
+            builder.Services.AddSingleton(new ConnectionService());
+            builder.Services.AddSingleton<BrowserService>();
             
             await builder.Build().RunAsync();
         }

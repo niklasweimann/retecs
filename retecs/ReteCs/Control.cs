@@ -26,11 +26,6 @@ namespace retecs.ReteCs
 
         public Node GetNode()
         {
-            if (ParentInput?.Node != null && ParentInput != null)
-            {
-                throw new Exception("Control can\'t be added to Node and Input");
-            }
-
             return ParentNode ?? ParentInput?.Node ?? throw new Exception("Control hasn\'t be added to Input or Node");
         }
 
