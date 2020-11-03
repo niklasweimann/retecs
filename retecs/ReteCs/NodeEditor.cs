@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
-using Microsoft.AspNetCore.Components;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
 using retecs.Shared;
@@ -14,10 +13,10 @@ namespace retecs.ReteCs
         public Selected Selected { get; set; } = new Selected();
         public ReteEditor View { get; set; }
         public bool Silent { get; set; }
-        
-        public NodeEditor(string id, ElementReference container, Emitter emitter) : base(id, emitter)
+
+        public NodeEditor(string id, Emitter emitter) : base(id, emitter)
         {
-            View = new ReteEditor(container, Components, emitter);
+            View = new ReteEditor(Components, emitter);
             Nodes = new List<Node>();
 
             Emitter.WindowKeyDown += Emitter.OnKeyDown;
@@ -145,7 +144,7 @@ namespace retecs.ReteCs
             }
 
             Dictionary<string, Node> nodes = new Dictionary<string, Node>();
-            
+
             try
             {
                 foreach (var node in data.Nodes.Values)
@@ -173,7 +172,7 @@ namespace retecs.ReteCs
                             Connect(targetOutput, targetInput, restoreData);
                         }
                     }
-                    
+
                 }
             }
             catch (Exception e)

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs;
@@ -19,11 +16,9 @@ namespace retecs.Shared
         public Node Node { get; set; }
         [Parameter]
         public NodeEditor Editor { get; set; }
+
         public Point PointerStart { get; set; }
         public Component Component { get; set; }
-        public Dictionary<Io, ReteSocket> Sockets { get; set; }
-        public Dictionary<Control, ReteControl> Controls { get; set; }
-
         public Point StartPosition { get; set; }
 
         public List<string> Styles { get; set; } = new List<string>();
@@ -31,7 +26,13 @@ namespace retecs.Shared
 
         public ReteNode()
         {
-            
+
+        }
+
+        protected override void OnAfterRender(bool firstRender)
+        {
+            base.OnAfterRender(firstRender);
+            Node.UpdateEvent += StateHasChanged;
         }
 
         public ReteNode(Node node, Component component, Emitter emitter)
@@ -40,43 +41,10 @@ namespace retecs.Shared
             Emitter = emitter;
             Component = component;
             // todo this.el.addEventListener('contextmenu', e => this.trigger('contextmenu', { e, node: this.node }));
-            Emitter.OnRenderNode(node, component.Data, (reference, type, io) => BindSocket(type, io),
-                (reference, control) => BindControl(control));
+            Emitter.OnRenderNode(node, component.Data, (reference, type, io) => { },
+                (reference, control) => { });
+
             UpdateStyle();
-        }
-
-        public void ClearSocket()
-        {
-            var ios = new List<Io>();
-            ios.AddRange(Node.Inputs.Values);
-            ios.AddRange(Node.Outputs.Values);
-
-            foreach (var keyValuePair in Sockets.Where(keyValuePair => !ios.Contains(keyValuePair.Key)))
-            {
-                Sockets.Remove(keyValuePair.Key);
-            }
-        }
-
-        public void BindSocket(string type, Io io)
-        {
-            ClearSocket();
-            Sockets.Add(io, new ReteSocket(type, io, Node, Emitter));
-        }
-
-        public void BindControl(Control control)
-        {
-            Controls.Add(control, new ReteControl(control, Emitter));
-        }
-
-        public Point GetSocketPosition(Io io)
-        {
-            Sockets.TryGetValue(io, out var value);
-            if (value == null)
-            {
-                throw new Exception($"Socket not found for ${io.Name} with key ${io.Key}");
-            }
-
-            return value.GetPosition(Node.Position);
         }
 
         public void OnSelect(MouseEventArgs mouseEventArgs)

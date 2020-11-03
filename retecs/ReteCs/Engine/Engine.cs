@@ -50,7 +50,7 @@ namespace retecs.ReteCs.Engine
             {
                 return false;
             }
-            
+
             Console.WriteLine("The process is busy and has not been restarted. Use abort() to force it to complete");
             return false;
         }
@@ -79,7 +79,7 @@ namespace retecs.ReteCs.Engine
                     break;
                 case State.Abort:
                     OnAbort.Invoke();
-                    //OnAbort = ret; 
+                    //OnAbort = ret;
                     break;
                 default:
                     //ret();
@@ -130,7 +130,7 @@ namespace retecs.ReteCs.Engine
                         connData.Add(outputs[connection.Output]);
                     }
                 }
-                
+
                 obj[key] = connData;
             }
 
@@ -162,14 +162,14 @@ namespace retecs.ReteCs.Engine
                 Emitter.OnWarn($"Engine has State {State} {(node == null ? "and node was null: " : "")}Stop processing");
                 return null;
             }
-            
+
             Lock(node);
 
             if (node.OutputData == null)
             {
                 node.OutputData = ProcessWorker(node);
             }
-            
+
             Unlock(node);
             return node.OutputData;
         }

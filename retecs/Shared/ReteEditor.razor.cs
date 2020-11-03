@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using retecs.ReteCs;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
@@ -12,7 +11,6 @@ namespace retecs.Shared
     {
         [Inject]
         public Emitter Emitter { get; set; }
-        public ElementReference Container { get; set; }
         public Dictionary<string, Component> Components { get; set; }
         public Dictionary<Node, ReteNode> Nodes { get; } = new Dictionary<Node, ReteNode>();
         public Dictionary<Connection, ReteConnection> ConnectionViews { get; } = new Dictionary<Connection, ReteConnection>();
@@ -20,15 +18,13 @@ namespace retecs.Shared
 
         public ReteEditor()
         {
-            
+
         }
 
-        public ReteEditor(ElementReference container, Dictionary<string, Component> components, Emitter emitter)
+        public ReteEditor(Dictionary<string, Component> components, Emitter emitter)
         {
             Emitter = emitter;
-            Container = container;
             Components = components;
-            Emitter.Click += (args, reference) => Click(args);
             Emitter.WindowContextMenu += args =>  Emitter.OnContextMenu(args);
             Emitter.WindowResize += Resize;
             Emitter.Destroy += () =>
@@ -70,8 +66,8 @@ namespace retecs.Shared
                 throw new Exception(
                     $"View node not found for input ({connection.Input.Node}) or output ({connection.Output.Node})");
             }
-            var connView = new ReteConnection(connection, viewInput, viewOutput, Emitter);
-            ConnectionViews.Add(connection, connView);
+            //var connView = new ReteConnection(connection, viewInput, viewOutput, Emitter);
+           // todo: ConnectionViews.Add(connection, connView);
         }
 
         public void RemoveConnection(Connection connection)
@@ -81,22 +77,22 @@ namespace retecs.Shared
 
         public void UpdateConnections(Node node, Point prevPoint)
         {
-            var connections = node.GetConnections();
-            foreach (var connection in connections)
-            {
-                ConnectionViews.TryGetValue(connection, out var connectionView);
-                if (connectionView == null)
-                {
-                    Emitter.OnWarn("Connection view not found");
-                    continue;
-                }
-                connectionView.Update();
-            }
+            //var connections = node.GetConnections();
+            //foreach (var connection in connections)
+            //{
+            //    ConnectionViews.TryGetValue(connection, out var connectionView);
+            //    if (connectionView == null)
+            //    {
+            //        Emitter.OnWarn("Connection view not found");
+            //        continue;
+            //    }
+            //    connectionView.Update();
+            //}
         }
 
         public void Resize()
         {
-            
+
             /*
              TODO
              * const { container } = this;
@@ -110,13 +106,6 @@ namespace retecs.Shared
         container.style.width = width + 'px';
         container.style.height = height + 'px';
              */
-        }
-
-        public void Click(MouseEventArgs mouseEventArgs)
-        {
-            //ToDO
-            //if (container !== e.target) return;
-            Emitter.OnClick(mouseEventArgs, Container);
         }
     }
 }

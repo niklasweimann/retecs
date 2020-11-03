@@ -17,7 +17,7 @@ namespace retecs
 
             builder.Services.AddScoped(
                 _ => new HttpClient {BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)});
-            builder.Services.AddSingleton(new Emitter());
+            builder.Services.AddSingleton(SingletonEmitter.Instance);
             builder.Services.AddSingleton(new ConnectionService());
             builder.Services.AddSingleton<BrowserService>();
             

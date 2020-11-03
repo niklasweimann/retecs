@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using retecs.ReteCs.Entities;
 
 namespace retecs.BlazorServices
 {
@@ -16,6 +17,18 @@ namespace retecs.BlazorServices
         public BrowserDimension GetDimension()
         {
             return JsRuntime.Invoke<BrowserDimension>("getDimensions");
+        }
+
+        public Point GetPositionOfElement(ElementReference elementReference)
+        {
+            var pos = JsRuntime.Invoke<int[]>("ReteCsInterop.getPosition", elementReference);
+            return new Point(pos[0], pos[1]);
+        }
+
+        public (Point, Point) GetBoundingBox(ElementReference elementReference)
+        {
+            var positions = JsRuntime.Invoke<int[]>("getBoundingBox", elementReference);
+            return (new Point(positions[0], positions[1]), new Point(positions[2], positions[3]));
         }
     }
 

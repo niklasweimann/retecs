@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using retecs.ReteCs.Entities;
 
@@ -19,7 +18,7 @@ namespace retecs.ReteCs
 
         public event Action UpdateEvent;
 
-        private static int latestId = 0;
+        private static int _latestId;
 
         public Node(string name)
         {
@@ -29,12 +28,12 @@ namespace retecs.ReteCs
 
         public static int IncrementId()
         {
-            return latestId++;
+            return _latestId++;
         }
 
         public static void ResetId()
         {
-            latestId = 0;
+            _latestId = 0;
         }
 
         private void Add<T>(Dictionary<string, T> list, T item) where T : Io
@@ -123,7 +122,7 @@ namespace retecs.ReteCs
 
         private Dictionary<string, InputData> ReduceIO(Dictionary<string, Input> list) =>
             list.ToDictionary(input => input.Key, input => input.Value.ToJson());
-        
+
         private Dictionary<string, OutputData> ReduceIO(Dictionary<string, Output> list) =>
             list.ToDictionary(output => output.Key, output => output.Value.ToJson());
 
@@ -146,7 +145,7 @@ namespace retecs.ReteCs
             {
                 Position = nodeData.Position, Id = nodeData.Id, Data = nodeData.Data, Name = nodeData.Name
             };
-            latestId = Math.Max(Convert.ToInt32(node.Id), latestId);
+            _latestId = Math.Max(Convert.ToInt32(node.Id), _latestId);
             return node;
         }
     }

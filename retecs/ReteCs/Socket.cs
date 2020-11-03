@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
 
 namespace retecs.ReteCs
 {
@@ -7,13 +6,12 @@ namespace retecs.ReteCs
     {
         public string Name { get; set; }
         public object Data { get; set; }
-        public List<Socket> Compatible { get; set; }
+        public List<Socket> Compatible { get; } = new List<Socket>();
 
         public Socket(string name, object data = null)
         {
             Name = name;
             Data = data;
-            Compatible = new List<Socket>();
         }
 
         public void CombineWith(Socket socket)

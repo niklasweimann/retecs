@@ -14,11 +14,6 @@ namespace retecs.ReteCs
 
         }
 
-        public bool HasConnection()
-        {
-            return Connections.Any();
-        }
-
         public void AddConnection(Connection connection)
         {
             if (!MultipleConnections && HasConnection())
