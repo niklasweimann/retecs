@@ -1,4 +1,6 @@
 ﻿@using retecs.RenderPlugin.Entities
+@using ReteCs.Enums;
+@using retecs.Shared;
 <div style="transform-origin: 0px 0px; transform: translate(-2px, 0px) scale(1);">
     <div style="@GetStyle()"
          @onclick="OnSelect"
@@ -17,7 +19,7 @@
                 @foreach (var output in Node.Outputs.Values)
                 {
                     <div class="output-title">@output.Name</div>
-                    <ReteSocket Io="@output" Socket="@output.Socket"></ReteSocket>
+                    <ReteSocket Io="@output" Socket="@output.Socket" Type="IoTypes.Output"></ReteSocket>
                 }
             </div>
             <div class="control">
@@ -31,7 +33,7 @@
             <div class="input">
                 @foreach (var input in Node.Inputs.Values)
                 {
-                    <ReteSocket Io="@input" Socket="@input.Socket"></ReteSocket>
+                    <ReteSocket Io="@input" Socket="@input.Socket" Type="IoTypes.Input"></ReteSocket>
                     @if (!input.ShowControl())
                     {
                         <div class="input-title">@input.Name</div>

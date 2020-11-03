@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.Web;
 using retecs.BlazorServices;
 using retecs.ReteCs;
 using retecs.ReteCs.core;
-using retecs.ReteCs.Entities;
+using retecs.ReteCs.Enums;
 
 namespace retecs.Shared
 {
@@ -12,41 +12,19 @@ namespace retecs.Shared
     {
         [Inject]
         public ConnectionService ConnectionService { get; set; }
+        [Inject]
         public Emitter Emitter { get; set; }
-        public string Type { get; set; }
+        
+        [Parameter]
+        public IoTypes Type { get; set; }
         [Parameter]
         public Io Io { get; set; }
-
         [Parameter]
         public Socket Socket { get; set; }
-
         public Node Node { get; set; }
 
+        public ElementReference? SocketDot { get; set; }
 
-        public ReteSocket()
-        {
-            
-        }
-
-        public ReteSocket(string type, Io io, Node node, Emitter emitter)
-        {
-            Emitter = emitter;
-            Type = type;
-            Io = io;
-            Node = node;
-            Emitter.OnRenderSocket(io.Socket, io);
-        }
-
-        public Point GetPosition(Point position)
-        {
-            // TODO: Get ElementReference offsetLeft and offsetWidth and offsetTop and offsetHeight
-            /*
-             * return [
-            position[0] + el.offsetLeft + el.offsetWidth / 2,
-            position[1] + el.offsetTop + el.offsetHeight / 2
-             */
-            return new Point(1, 1);
-        }
 
         private string SocketClasses()
         {
@@ -68,14 +46,14 @@ namespace retecs.Shared
         {
             if (Io.GetType().IsAssignableFrom(typeof(Input)))
             {
-                if (!ConnectionService.SetInput((Input) Io, Socket))
+                if (!ConnectionService.SetInput((Input) Io, Socket, SocketDot.Value))
                 {
                     Emitter.OnWarn("Could not creat Connection");
                 }
             }
             else if (Io.GetType().IsAssignableFrom(typeof(Output)))
             {
-                if (!ConnectionService.SetOutput((Output) Io, Socket))
+                if (!ConnectionService.SetOutput((Output) Io, Socket, SocketDot.Value))
                 {
                     Emitter.OnWarn("Could not create Connection");
                 }
@@ -84,8 +62,6 @@ namespace retecs.Shared
             {
                 Emitter.OnError("Socket is neither input nor output");
             }
-            Emitter.OnInfo($"Emitter is null? {ConnectionService.Emitter == null}");
-
         }
     }
 }

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using retecs.ReteCs;
 using retecs.ReteCs.core;
 using retecs.ReteCs.Entities;
@@ -31,15 +29,12 @@ namespace retecs.Components
 
             const string controlKey = "num";
             var ctrl = editorNode.Controls[controlKey];
-            Emitter.OnError("bla", node.Data);
             if (input != null && input.Any())
             {
                 ((NumControl)ctrl)?.SetValue(input.FirstOrDefault());
             }
             else if (nodeData != null)
             {
-                Emitter.OnError("bla12", nodeData);
-
                 ((NumControl)ctrl)?.SetValue(nodeData);
             }
 

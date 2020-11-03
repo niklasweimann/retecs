@@ -7,7 +7,7 @@ using retecs.Shared;
 
 namespace retecs.ReteCs.core
 {
-    public partial class Emitter
+    public class Emitter
     {
         #region Internal
         
@@ -25,6 +25,7 @@ namespace retecs.ReteCs.core
         public delegate void UpdateStateEventHandler();
 
         public event InfoEventHandler Info;
+        public event InfoEventHandler Debug;
         public event WarnEventHandler Warn;
         public event ErrorEventHandler Error;
         public event ComponentRegisterEventHandler ComponentRegister;
@@ -33,6 +34,7 @@ namespace retecs.ReteCs.core
 
         public void OnWarn(string warn, object data = null) => Warn?.Invoke(warn, data);
         public void OnInfo(string info, object data = null) => Info?.Invoke(info, data);
+        public void OnDebug(string info, object data = null) => Debug?.Invoke(info, data);
         public void OnError(string error, object data = null) => Error?.Invoke(error, data);
         public void OnComponentRegister(Component component) => ComponentRegister?.Invoke(component);
         public void OnDestroy() => Destroy?.Invoke();
@@ -67,7 +69,7 @@ namespace retecs.ReteCs.core
         public delegate void NodeSelectedEventHandler(Node node);
 
         public delegate void RenderNodeEventHandler(Node node, object componentData,
-            Action<ElementReference, string, Io> bindSocket, Action<ElementReference, Control> bindControl);
+            Action<ElementReference, IoTypes, Io> bindSocket, Action<ElementReference, Control> bindControl);
 
         public event NodeCreateEventHandler NodeCreate;
         public event NodeCreatedEventHandler NodeCreated;
@@ -103,7 +105,7 @@ namespace retecs.ReteCs.core
         public void OnNodeSelected(Node node) => NodeSelected?.Invoke(node);
 
         public void OnRenderNode(Node node, object componentData,
-            Action<ElementReference, string, Io> bindsocket, Action<ElementReference, Control> bindcontrol) =>
+            Action<ElementReference, IoTypes, Io> bindsocket, Action<ElementReference, Control> bindcontrol) =>
             RenderNode?.Invoke(node, componentData, bindsocket, bindcontrol);
 
         #endregion
@@ -153,15 +155,17 @@ namespace retecs.ReteCs.core
 
         #region Connection
 
-        public delegate void RenderConnectionEventHandler(Connection connection, Input input, Output output);
+        public delegate void RenderConnectionEventHandler(Connection connection, Input input, Output output,
+            ElementReference inputElementReference, ElementReference outputElementReference);
 
         public delegate void UpdateConnectionEventHandler(Connection connection, (Point, Point) points);
 
         public event RenderConnectionEventHandler RenderConnection;
         public event UpdateConnectionEventHandler UpdateConnection;
 
-        public void OnRenderConnection(Connection connection, Input input, Output output) =>
-            RenderConnection?.Invoke(connection, input, output);
+        public void OnRenderConnection(Connection connection, Input input, Output output,
+            ElementReference inputElementReference, ElementReference outputElementReference) =>
+            RenderConnection?.Invoke(connection, input, output, inputElementReference, outputElementReference);
 
         public void OnUpdateConnection(Connection connection, (Point, Point) points) =>
             UpdateConnection?.Invoke(connection, points);

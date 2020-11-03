@@ -1,4 +1,4 @@
 ﻿@if (Socket != null)
 {
-    <div class="@SocketClasses()" title="@Socket.Name" @onclick="HandleSocketClick"></div>
+    <div class="@SocketClasses()" title="@Socket.Name" @onclick="HandleSocketClick" @ref="SocketDot"></div>
 }

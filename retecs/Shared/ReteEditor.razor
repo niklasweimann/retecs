@@ -5,13 +5,11 @@
 @using retecs.RenderPlugin
 @using System.Text.Json
 @using retecs.BlazorServices
-@using retecs.Plugin.Connection
-@using retecs.ReteCs.core
 @inject BrowserService BrowserService;
 <!--TODO @onresize="@()"-->
 <!--TODO Contextmenu -->
 <div class="wrapper">
-    <div class="node-editor" 
+    <div class="node-editor"
          style="@Styles">
         <ReteArea RenderFragment="@_renderFragment"></ReteArea>
     </div>
@@ -20,9 +18,7 @@
 @code {
     public NodeEditor Editor { get; set; }
     public Engine Engine { get; set; }
-    ElementReference _containerRef;
     RenderFragment _renderFragment;
-    bool _preventRender = false;
     public string Styles { get; set; }
     int _innerHeight = 0;
     int _innerWidth = 0;
@@ -47,7 +43,7 @@
             }
             return "";
         };
-        Editor = new NodeEditor(Guid.NewGuid().ToString(), _containerRef, Emitter);
+        Editor = new NodeEditor("rete@0.0.1", Emitter);
         Editor.Emitter.WindowKeyDown += _ => Console.WriteLine("WindowKeyDown");
         Editor.Emitter.WindowKeyUp += _ => Console.WriteLine("WindowKeyUp");
         Editor.Emitter.WindowMouseMove += _ => Console.WriteLine("WindowMouseMove");
@@ -55,9 +51,9 @@
         Editor.Emitter.Warn += (warning, data) =>  Console.WriteLine("Warning: " + warning + serialize(data));
         Editor.Emitter.Error += (error, data) => Console.WriteLine("Error: " + error + serialize(data));
         Editor.Emitter.Info += (info, data) =>  Console.WriteLine("Info: " + info + serialize(data));
+        Editor.Emitter.Debug += (info, data) =>  Console.WriteLine("Debug: " + info + serialize(data));
 
         Editor.Use(new BasicRenderer());
-        Editor.Use(new ConnectionBasePlugin());
         // editor.use(ContextMenuPlugin);
 
         Engine = new Engine("rete@0.0.1", Emitter);
@@ -73,8 +69,10 @@
             {"num", 2}
         });
         var n2 = components[1].CreateNode(new Dictionary<string, object>());
+        var n3 = components[1].CreateNode(new Dictionary<string, object>());
         n1.Position = new Point(80, 200);
         n2.Position = new Point(400, 200);
+        n3.Position = new Point(400, 400);
         Editor.Emitter.Process += RequestAnimationFrame;
         Editor.Emitter.ConnectionCreated += _ => RequestAnimationFrame();
         Editor.Emitter.ConnectionRemoved += _ => RequestAnimationFrame();
@@ -101,17 +99,22 @@
                 builder.CloseComponent();
             };
         };
-        Editor.Emitter.ConnectionCreated += (connection) =>
+        Editor.Emitter.RenderConnection += (connection, input, output, inputElementReference, outputElementReference) =>
         {
             _renderFragment += builder =>
             {
                 builder.OpenComponent<ReteConnection>(++seq);
                 builder.AddAttribute(++seq, nameof(ReteConnection.Connection), connection);
+                builder.AddAttribute(++seq, nameof(ReteConnection.Input), input);
+                builder.AddAttribute(++seq, nameof(ReteConnection.Output), output);
+                builder.AddAttribute(++seq, nameof(ReteConnection.InputElementReference), inputElementReference);
+                builder.AddAttribute(++seq, nameof(ReteConnection.OutputElementReference), outputElementReference);
                 builder.CloseComponent();
             };
         };
         Editor.AddNode(n1);
         Editor.AddNode(n2);
+        Editor.AddNode(n3);
         Editor.Connect(n1.Outputs["num"], n2.Inputs["innum"]);
         Styles = GetStyles();
         Engine.Emitter.OnProcess();
@@ -121,6 +124,5 @@
     {
         Engine.Abort();
         Engine.ProcessData(Editor.ToJson(), "0");
-        Emitter.OnUpdateState();
     }
 }

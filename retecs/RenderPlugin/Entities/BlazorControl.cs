@@ -6,7 +6,6 @@ namespace retecs.RenderPlugin.Entities
 {
     public class BlazorControl: Control
     {
-        public string Render { get; } = "basicBlazorRenderer";
         public bool Readonly { get; set; }
         public Action<object> ChangeHandler { get; set; }
         public object Value { get; set; }
