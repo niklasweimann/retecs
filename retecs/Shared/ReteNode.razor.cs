@@ -26,7 +26,13 @@ namespace retecs.Shared
 
         public ReteNode()
         {
-            
+
+        }
+
+        protected override void OnAfterRender(bool firstRender)
+        {
+            base.OnAfterRender(firstRender);
+            Node.UpdateEvent += StateHasChanged;
         }
 
         public ReteNode(Node node, Component component, Emitter emitter)
