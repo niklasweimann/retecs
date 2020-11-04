@@ -5,6 +5,13 @@
             const centerY = ref.offsetTop + ref.offsetHeight / 2;
             return [centerX, centerY];
         }
+
+        public getDimensions():{} {
+            return {
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+        }
     }
 
     export function Load(): void {

@@ -18,6 +18,12 @@ namespace retecs.BlazorServices
 
         public bool SetInput(Input input, Socket inputSocket, ElementReference inputElementReference)
         {
+            if (Output == null && Input != null)
+            {
+                Reset();
+                Emitter.OnInfo("Canceling connection, because input clicked two times.");
+                return false;
+            }
             if (!AreSocketsCompatible(inputSocket))
             {
                 Emitter.OnError("Sockets are not compatible");
@@ -32,6 +38,12 @@ namespace retecs.BlazorServices
 
         public bool SetOutput(Output output, Socket outputSocket, ElementReference outputElementReference)
         {
+            if (Output != null && Input == null)
+            {
+                Reset();
+                Emitter.OnInfo("Canceling connection, because output clicked two times.");
+                return false;
+            }
             if (!AreSocketsCompatible(outputSocket))
             {
                 Emitter.OnError("Sockets are not compatible");
@@ -56,20 +68,10 @@ namespace retecs.BlazorServices
             Reset();
         }
 
-        private bool IsFirstSocket()
-        {
-            return InputSocket == null || OutputSocket == null;
-        }
+        private bool IsFirstSocket() => InputSocket == null || OutputSocket == null;
 
-        private bool AreSocketsCompatible(Socket socketToAdd)
-        {
-            if (InputSocket != null)
-            {
-                return InputSocket.CompatibleWith(socketToAdd);
-            }
-
-            return OutputSocket == null || OutputSocket.CompatibleWith(socketToAdd);
-        }
+        private bool AreSocketsCompatible(Socket socketToAdd) =>
+            InputSocket?.CompatibleWith(socketToAdd) ?? OutputSocket == null || OutputSocket.CompatibleWith(socketToAdd);
 
         private void Reset()
         {

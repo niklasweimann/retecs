@@ -63,7 +63,7 @@ namespace retecs.ReteCs.Engine
             {
                 return true;
             }
-            OnAbort.Invoke();
+            OnAbort?.Invoke();
             OnAbort = () => { };
 
             return false;
@@ -149,7 +149,7 @@ namespace retecs.ReteCs.Engine
             catch (Exception e)
             {
                 Abort();
-                Emitter.OnWarn(e.Message, e);
+                Emitter.OnWarn(e.Message);
             }
 
             return outputData;

@@ -14,7 +14,7 @@ namespace retecs.Shared
         public ConnectionService ConnectionService { get; set; }
         [Inject]
         public Emitter Emitter { get; set; }
-        
+
         [Parameter]
         public IoTypes Type { get; set; }
         [Parameter]
@@ -48,7 +48,7 @@ namespace retecs.Shared
             {
                 if (!ConnectionService.SetInput((Input) Io, Socket, SocketDot.Value))
                 {
-                    Emitter.OnWarn("Could not creat Connection");
+                    Emitter.OnWarn("Could not create Connection");
                 }
             }
             else if (Io.GetType().IsAssignableFrom(typeof(Output)))

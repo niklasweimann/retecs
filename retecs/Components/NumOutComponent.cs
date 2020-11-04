@@ -6,7 +6,7 @@ using retecs.ReteCs.Entities;
 
 namespace retecs.Components
 {
-    public class NumOutComponent : Component 
+    public class NumOutComponent : Component
     {
         public Emitter Emitter { get; }
 
@@ -28,7 +28,7 @@ namespace retecs.Components
             }
 
             const string controlKey = "num";
-            var ctrl = editorNode.Controls[controlKey];
+            editorNode.Controls.TryGetValue(controlKey, out var ctrl);
             if (input != null && input.Any())
             {
                 ((NumControl)ctrl)?.SetValue(input.FirstOrDefault());

@@ -16,7 +16,7 @@ namespace retecs.BlazorServices
 
         public BrowserDimension GetDimension()
         {
-            return JsRuntime.Invoke<BrowserDimension>("getDimensions");
+            return JsRuntime.Invoke<BrowserDimension>("ReteCsInterop.getDimensions");
         }
 
         public Point GetPositionOfElement(ElementReference elementReference)
@@ -27,7 +27,7 @@ namespace retecs.BlazorServices
 
         public (Point, Point) GetBoundingBox(ElementReference elementReference)
         {
-            var positions = JsRuntime.Invoke<int[]>("getBoundingBox", elementReference);
+            var positions = JsRuntime.Invoke<int[]>("ReteCsInterop.getBoundingBox", elementReference);
             return (new Point(positions[0], positions[1]), new Point(positions[2], positions[3]));
         }
     }

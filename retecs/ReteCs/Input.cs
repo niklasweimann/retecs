@@ -30,20 +30,16 @@ namespace retecs.ReteCs
             control.ParentInput = this;
         }
 
-        public bool ShowControl()
-        {
-            return !HasConnection() && Control != null;
-        }
+        public bool ShowControl() => !HasConnection() && Control != null;
 
-        public InputData ToJson()
-        {
-            return new InputData
-            {
-                Connections = Connections?.Select(x => new InputConnectionData
-                {
-                    Node = x.Output.Node.Id, Output = x.Output.Key, Data = x.Data
-                }).ToList()
-            };
-        }
+        public InputData ToJson() => new InputData
+                                     {
+                                         Connections = Connections?.Select(x => new InputConnectionData
+                                                                                {
+                                                                                    Node = x.Output.Node.Id,
+                                                                                    Output = x.Output.Key, Data = x.Data
+                                                                                })
+                                                                  .ToList()
+                                     };
     }
 }
