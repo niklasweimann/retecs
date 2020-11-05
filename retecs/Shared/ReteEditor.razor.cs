@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
+using retecs.Components;
+using retecs.RenderPlugin;
 using retecs.ReteCs;
 using retecs.ReteCs.core;
+using retecs.ReteCs.Engine;
 using retecs.ReteCs.Entities;
+using Component = retecs.ReteCs.Component;
 
 namespace retecs.Shared
 {
@@ -21,98 +26,109 @@ namespace retecs.Shared
 
         }
 
-       /* protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        Func<object, string> serialize = data =>
+        protected override void OnInitialized()
         {
-            if (data != null)
-            {
-                return "; Data: " + JsonSerializer.Serialize(data);
-            }
-            return "";
-        };
-        Editor = new NodeEditor("rete@0.0.1", Emitter);
-        Editor.Emitter.WindowKeyDown += _ => Console.WriteLine("WindowKeyDown");
-        Editor.Emitter.WindowKeyUp += _ => Console.WriteLine("WindowKeyUp");
-        Editor.Emitter.WindowMouseMove += _ => Console.WriteLine("WindowMouseMove");
-        Editor.Emitter.WindowMouseUp += _ => Console.WriteLine("WindowMouseUp");
-        Editor.Emitter.Warn += (warning, data) =>  Console.WriteLine("Warning: " + warning + serialize(data));
-        Editor.Emitter.Error += (error, data) => Console.WriteLine("Error: " + error + serialize(data));
-        Editor.Emitter.Info += (info, data) =>  Console.WriteLine("Info: " + info + serialize(data));
-        Editor.Emitter.Debug += (info, data) =>  Console.WriteLine("Debug: " + info + serialize(data));
+            base.OnInitialized();
+            Func<object, string> serialize = data =>
+                                             {
+                                                 if (data != null)
+                                                 {
+                                                     return "; Data: " + JsonSerializer.Serialize(data);
+                                                 }
 
-        Editor.Use(new BasicRenderer());
-        // editor.use(ContextMenuPlugin);
+                                                 return "";
+                                             };
+            Editor = new NodeEditor("rete@0.0.1", Emitter);
+            Editor.Emitter.WindowKeyDown += _ => Console.WriteLine("WindowKeyDown");
+            Editor.Emitter.WindowKeyUp += _ => Console.WriteLine("WindowKeyUp");
+            Editor.Emitter.WindowMouseMove += _ => Console.WriteLine("WindowMouseMove");
+            Editor.Emitter.WindowMouseUp += _ => Console.WriteLine("WindowMouseUp");
+            Editor.Emitter.Warn += (warning, data) => Console.WriteLine("Warning: " + warning + serialize(data));
+            Editor.Emitter.Error += (error, data) => Console.WriteLine("Error: " + error + serialize(data));
+            Editor.Emitter.Info += (info, data) => Console.WriteLine("Info: " + info + serialize(data));
+            Editor.Emitter.Debug += (info, data) => Console.WriteLine("Debug: " + info + serialize(data));
 
-        Engine = new Engine("rete@0.0.1", Emitter);
-        var components = new List<Component>
-                         {
-                             new TextComponent(Emitter),
-                             new TextOutComponent(Emitter),
-                             new NumComponent(Emitter),
-                             new CaesarComponent(Emitter)
-                         };
-        components.ForEach(component =>
-        {
-            Editor.Register(component);
-            Engine.Register(component);
-        });
+            Editor.Use(new BasicRenderer());
+            // editor.use(ContextMenuPlugin);
 
-        var n1 = components[0].CreateNode(new Dictionary<string, object>());
-        var n2 = components[1].CreateNode(new Dictionary<string, object>());
-        var n3 = components[2].CreateNode(new Dictionary<string, object>());
-        var n4 = components[3].CreateNode(new Dictionary<string, object>());
-        n1.Position = new Point(80, 200);
-        n2.Position = new Point(400, 200);
-        n3.Position = new Point(400, 400);
-        n4.Position = new Point(120, 300);
-        Editor.Emitter.Process += RequestAnimationFrame;
-        Editor.Emitter.ConnectionCreated += _ => RequestAnimationFrame();
-        Editor.Emitter.ConnectionRemoved += _ => RequestAnimationFrame();
-        Editor.Emitter.NodeRemoved += _ => RequestAnimationFrame();
-        Editor.Emitter.NodeCreated += _ => RequestAnimationFrame();
+            Engine = new Engine("rete@0.0.1", Emitter);
+            var components = new List<Component>
+                             {
+                                 new TextComponent(Emitter),
+                                 new TextOutComponent(Emitter),
+                                 new NumComponent(Emitter),
+                                 new CaesarComponent(Emitter)
+                             };
+            components.ForEach(component =>
+                               {
+                                   Editor.Register(component);
+                                   Engine.Register(component);
+                               });
 
-        var seq = 0;
-        Editor.Emitter.NodeCreated += node =>
-        {
-            _renderFragment += builder =>
-            {
-                builder.OpenComponent<ReteNode>(++seq);
-                builder.AddAttribute(++seq, "Editor", Editor);
-                builder.AddAttribute(++seq, "Node", node);
-                builder.CloseComponent();
-            };
-        };
-        Editor.Emitter.RenderControl += control =>
-        {
-            _renderFragment += builder =>
-            {
-                builder.OpenComponent<ReteControl>(++seq);
-                builder.AddAttribute(++seq, "Control", control);
-                builder.CloseComponent();
-            };
-        };
-        Editor.Emitter.RenderConnection += (connection, input, output, inputElementReference, outputElementReference) =>
-        {
-            _renderFragment += builder =>
-            {
-                builder.OpenComponent<ReteConnection>(++seq);
-                builder.AddAttribute(++seq, nameof(ReteConnection.Connection), connection);
-                builder.AddAttribute(++seq, nameof(ReteConnection.Input), input);
-                builder.AddAttribute(++seq, nameof(ReteConnection.Output), output);
-                builder.AddAttribute(++seq, nameof(ReteConnection.InputElementReference), inputElementReference);
-                builder.AddAttribute(++seq, nameof(ReteConnection.OutputElementReference), outputElementReference);
-                builder.CloseComponent();
-            };
-        };
-        Editor.AddNode(n1);
-        Editor.AddNode(n2);
-        Editor.AddNode(n3);
-        Editor.AddNode(n4);
-        Styles = GetStyles();
-        Engine.Emitter.OnProcess();
-    }*/
+            var n1 = components[0]
+                .CreateNode(new Dictionary<string, object>());
+            var n2 = components[1]
+                .CreateNode(new Dictionary<string, object>());
+            var n3 = components[2]
+                .CreateNode(new Dictionary<string, object>());
+            var n4 = components[3]
+                .CreateNode(new Dictionary<string, object>());
+            n1.Position = new Point(80, 200);
+            n2.Position = new Point(400, 200);
+            n3.Position = new Point(400, 400);
+            n4.Position = new Point(120, 300);
+            Editor.Emitter.Process += RequestAnimationFrame;
+            Editor.Emitter.ConnectionCreated += _ => RequestAnimationFrame();
+            Editor.Emitter.ConnectionRemoved += _ => RequestAnimationFrame();
+            Editor.Emitter.NodeRemoved += _ => RequestAnimationFrame();
+            Editor.Emitter.NodeCreated += _ => RequestAnimationFrame();
+
+            var seq = 0;
+            Editor.Emitter.NodeCreated += node =>
+                                          {
+                                              _renderFragment += builder =>
+                                                                 {
+                                                                     builder.OpenComponent<ReteNode>(++seq);
+                                                                     builder.AddAttribute(++seq, "Editor", Editor);
+                                                                     builder.AddAttribute(++seq, "Node", node);
+                                                                     builder.CloseComponent();
+                                                                 };
+                                          };
+            Editor.Emitter.RenderControl += control =>
+                                            {
+                                                _renderFragment += builder =>
+                                                                   {
+                                                                       builder.OpenComponent<ReteControl>(++seq);
+                                                                       builder.AddAttribute(++seq, "Control", control);
+                                                                       builder.CloseComponent();
+                                                                   };
+                                            };
+            Editor.Emitter.RenderConnection += (connection, input, output, inputElementReference, outputElementReference) =>
+                                               {
+                                                   _renderFragment += builder =>
+                                                                      {
+                                                                          builder.OpenComponent<ReteConnection>(++seq);
+                                                                          builder.AddAttribute(++seq, nameof(ReteConnection.Connection),
+                                                                              connection);
+                                                                          builder.AddAttribute(++seq, nameof(ReteConnection.Input), input);
+                                                                          builder.AddAttribute(++seq, nameof(ReteConnection.Output),
+                                                                              output);
+                                                                          builder.AddAttribute(++seq,
+                                                                              nameof(ReteConnection.InputElementReference),
+                                                                              inputElementReference);
+                                                                          builder.AddAttribute(++seq,
+                                                                              nameof(ReteConnection.OutputElementReference),
+                                                                              outputElementReference);
+                                                                          builder.CloseComponent();
+                                                                      };
+                                               };
+            Editor.AddNode(n1);
+            Editor.AddNode(n2);
+            Editor.AddNode(n3);
+            Editor.AddNode(n4);
+            Styles = GetStyles();
+            Engine.Emitter.OnProcess();
+        }
 
         public ReteEditor(Dictionary<string, Component> components, Emitter emitter)
         {

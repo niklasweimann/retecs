@@ -46,19 +46,13 @@ namespace retecs.Components
                 Emitter.OnDebug($"editorNode is null, so return early");
                 return;
             }
-            caesar.PropertyChanged += (sender, eventArgs) =>
-                                      {
-                                          if (eventArgs.PropertyName != nameof(caesar.OutputString))
-                                          {
-                                              return;
-                                          }
 
-                                          editorNode.Controls.TryGetValue("preview", out var control1);
-                                          Emitter.OnDebug($"control is null? {control1 == null}");
-                                          ((TextControl) control1)?.SetValue(caesar.OutputString ?? string.Empty);
+            editorNode.Controls.TryGetValue("preview", out var control1);
+            Emitter.OnDebug($"control is null? {control1 == null}");
+            ((TextControl) control1)?.SetValue(caesar.OutputString ?? string.Empty);
 
-                                          outputs["cypher"] = caesar.OutputString;
-                                      };
+            outputs["cypher"] = caesar.OutputString;
+
             editorNode.Controls.TryGetValue("preview2", out var control2);
             Emitter.OnDebug($"control2 is null? {control2 == null}");
             ((TextControl) control2)?.SetValue(input ?? string.Empty);
