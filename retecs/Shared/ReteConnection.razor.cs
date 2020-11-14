@@ -41,7 +41,7 @@ namespace retecs.Shared
         protected override void OnInitialized()
         {
             base.OnInitialized();
-            Emitter.NodeTranslated += (a, b) => Update();
+            Emitter.NodeTranslated += (node, point) => Update();
         }
 
         public ReteConnection(Connection connection, Input input, Output output, Emitter emitter)

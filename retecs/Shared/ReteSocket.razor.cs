@@ -12,23 +12,26 @@ namespace retecs.Shared
     {
         [Inject]
         public ConnectionService ConnectionService { get; set; }
+
         [Inject]
         public Emitter Emitter { get; set; }
-        
+
         [Parameter]
         public IoTypes Type { get; set; }
+
         [Parameter]
         public Io Io { get; set; }
+
         [Parameter]
         public Socket Socket { get; set; }
+
         public Node Node { get; set; }
 
         public ElementReference? SocketDot { get; set; }
 
-
         private string SocketClasses()
         {
-            var classes = new List<string> { "socket" };
+            var classes = new List<string> {"socket"};
 
             if (Socket != null)
             {
@@ -39,19 +42,22 @@ namespace retecs.Shared
             {
                 classes.Add(Io is Input ? "input" : "output");
             }
+
             return string.Join(" ", classes);
         }
 
         private void HandleSocketClick(MouseEventArgs mouseEventArgs)
         {
-            if (Io.GetType().IsAssignableFrom(typeof(Input)))
+            if (Io.GetType()
+                  .IsAssignableFrom(typeof(Input)))
             {
                 if (!ConnectionService.SetInput((Input) Io, Socket, SocketDot.Value))
                 {
-                    Emitter.OnWarn("Could not creat Connection");
+                    Emitter.OnWarn("Could not create Connection");
                 }
             }
-            else if (Io.GetType().IsAssignableFrom(typeof(Output)))
+            else if (Io.GetType()
+                       .IsAssignableFrom(typeof(Output)))
             {
                 if (!ConnectionService.SetOutput((Output) Io, Socket, SocketDot.Value))
                 {

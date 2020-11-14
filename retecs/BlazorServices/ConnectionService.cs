@@ -6,15 +6,19 @@ namespace retecs.BlazorServices
 {
     public class ConnectionService
     {
-        public Emitter Emitter { get; } = SingletonEmitter.Instance;
+        private Emitter Emitter { get; } = SingletonEmitter.Instance;
 
-        public Input Input { get; private set; }
-        public Output Output { get; private set; }
+        private Input Input { get; set; }
 
-        public Socket InputSocket { get; private set; }
-        public Socket OutputSocket { get; private set; }
-        public ElementReference InputElementReference { get; set; }
-        public ElementReference OutputElementReference { get; set; }
+        private Output Output { get; set; }
+
+        private Socket InputSocket { get; set; }
+
+        private Socket OutputSocket { get; set; }
+
+        private ElementReference? InputElementReference { get; set; }
+
+        private ElementReference? OutputElementReference { get; set; }
 
         public bool SetInput(Input input, Socket inputSocket, ElementReference inputElementReference)
         {
@@ -23,6 +27,7 @@ namespace retecs.BlazorServices
                 Emitter.OnError("Sockets are not compatible");
                 return false;
             }
+
             Input = input;
             InputSocket = inputSocket;
             InputElementReference = inputElementReference;
@@ -37,6 +42,7 @@ namespace retecs.BlazorServices
                 Emitter.OnError("Sockets are not compatible");
                 return false;
             }
+
             Output = output;
             OutputSocket = outputSocket;
             OutputElementReference = outputElementReference;
@@ -51,13 +57,22 @@ namespace retecs.BlazorServices
                 Emitter.OnDebug("First socket clicked. Return early");
                 return;
             }
+
             Emitter.OnDebug($"Start rendering Connection {InputSocket == null} {OutputSocket == null}");
-            Emitter.OnRenderConnection(new Connection(Output, Input), Input, Output, InputElementReference, OutputElementReference );
+            if (InputElementReference == null ||
+                OutputElementReference == null)
+            {
+                Emitter.OnError("Could not render Connection because a reference for a clicked Element is missing.");
+                return;
+            }
+            Emitter.OnRenderConnection(new Connection(Output, Input), Input, Output, InputElementReference.Value,
+                                       OutputElementReference.Value);
             Reset();
         }
 
         private bool IsFirstSocket()
         {
+            Emitter.OnDebug($"Is first socket? InputSocket: {InputSocket != null} OutputSocket: {OutputSocket != null}");
             return InputSocket == null || OutputSocket == null;
         }
 
@@ -73,8 +88,13 @@ namespace retecs.BlazorServices
 
         private void Reset()
         {
+            Emitter.OnInfo("Resetting Connection Service");
             Input = null;
+            InputSocket = null;
+            InputElementReference = null;
             Output = null;
+            OutputSocket = null;
+            OutputElementReference = null;
         }
     }
 }

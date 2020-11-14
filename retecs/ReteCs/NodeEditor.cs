@@ -143,7 +143,7 @@ namespace retecs.ReteCs
                 return false;
             }
 
-            Dictionary<string, Node> nodes = new Dictionary<string, Node>();
+            var nodes = new Dictionary<string, Node>();
 
             try
             {
@@ -156,13 +156,13 @@ namespace retecs.ReteCs
                 }
                 foreach (var node in data.Nodes.Values)
                 {
-                    foreach (var output in node.Outputs)
+                    foreach (var (key, _) in node.Outputs)
                     {
-                        foreach (var con in node.Outputs[output.Key].Connections)
+                        foreach (var con in node.Outputs[key].Connections)
                         {
                             var nodeId = con.Node;
                             var restoreData = con.Data;
-                            var targetOutput = nodes[nodeId].Outputs[output.Key];
+                            var targetOutput = nodes[nodeId].Outputs[key];
                             var targetInput = nodes[nodeId].Inputs[con.Input];
                             if (targetInput == null || targetOutput == null)
                             {
