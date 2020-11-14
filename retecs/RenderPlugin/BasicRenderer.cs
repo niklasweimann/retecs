@@ -22,9 +22,6 @@ namespace retecs.RenderPlugin
             connection.Input.Node.Update();
         }
 
-        private void HandleNodeSelected(Node node)
-        {
-            ((NodeEditor)Context).Nodes.ForEach(n => n.Update());
-        }
+        private void HandleNodeSelected(Node node) => ((NodeEditor)Context).Nodes.ForEach(n => n.Update());
     }
 }

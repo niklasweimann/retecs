@@ -11,19 +11,26 @@ namespace retecs.Shared
 {
     public partial class ReteConnection
     {
-        public RenderFragment RenderFragment { get; set; }
+        private RenderFragment RenderFragment { get; set; }
+
         [Inject]
         private Emitter Emitter { get; set; }
+
         [Inject]
         public BrowserService BrowserService { get; set; }
+
         [Parameter]
         public Connection Connection { get; set; }
+
         [Parameter]
         public Input Input { get; set; }
+
         [Parameter]
         public Output Output { get; set; }
+
         [Parameter]
         public ElementReference InputElementReference { get; set; }
+
         [Parameter]
         public ElementReference OutputElementReference { get; set; }
 
@@ -45,10 +52,7 @@ namespace retecs.Shared
             Emitter = emitter;
         }
 
-        public (Point,Point) GetPoints()
-        {
-            return (GetSocketPosition(InputElementReference), GetSocketPosition(OutputElementReference));
-        }
+        private (Point, Point) GetPoints() => (GetSocketPosition(InputElementReference), GetSocketPosition(OutputElementReference));
 
         public void Update()
         {
@@ -79,7 +83,7 @@ namespace retecs.Shared
             return connectionPath ?? string.Empty;
         }
 
-        public static RenderFragment RenderConnection(string d, Connection connection = null)
+        private static RenderFragment RenderConnection(string d, Connection connection = null)
         {
             var classes = new List<string>();
             if (connection != null)
@@ -106,15 +110,9 @@ namespace retecs.Shared
             return Path;
         }
 
-        public static string ToTrainCase(string str)
-        {
-            return str.ToLower().Replace(' ', '-');
-        }
+        private static string ToTrainCase(string str) => str.ToLower()
+                                                            .Replace(' ', '-');
 
-
-        public Point GetSocketPosition(ElementReference elementReference)
-        {
-            return BrowserService.GetPositionOfElement(elementReference);
-        }
+        private Point GetSocketPosition(ElementReference elementReference) => BrowserService.GetPositionOfElement(elementReference);
     }
 }

@@ -5,53 +5,39 @@
 @using retecs.RenderPlugin
 @using System.Text.Json
 @using retecs.BlazorServices
-@inject BrowserService BrowserService;
 <!--TODO @onresize="@()"-->
 <!--TODO Contextmenu -->
 <div class="wrapper">
     <div class="node-editor"
-         style="@Styles">
+         style="overflow: hidden;touch-action: none; height:100%; min-height: 100%; display: block; position: absolute;
+          width: 100%; min-width: 100%">
         <ReteArea RenderFragment="@_renderFragment"></ReteArea>
     </div>
 </div>
 
 @code {
-    public NodeEditor Editor { get; set; }
-    public Engine Engine { get; set; }
-    RenderFragment _renderFragment;
-    public string Styles { get; set; }
-    int _innerHeight = 0;
-    int _innerWidth = 0;
-
-    protected string GetStyles()
-    {
-        var dimension = BrowserService.GetDimension();
-        _innerHeight = dimension.Height;
-        _innerWidth = dimension.Width;
-        var classes = new List<string> {"overflow: hidden", "touch-action: none", $"width: {_innerWidth}px", $"height: {_innerHeight}px"};
-        return string.Join("; ", classes);
-    }
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        Func<object, string> serialize = data =>
+
+        static string Serialize(object data)
         {
             if (data != null)
             {
                 return "; Data: " + JsonSerializer.Serialize(data);
             }
             return "";
-        };
+        }
+
         Editor = new NodeEditor("rete@0.0.1", Emitter);
         Editor.Emitter.WindowKeyDown += _ => Console.WriteLine("WindowKeyDown");
         Editor.Emitter.WindowKeyUp += _ => Console.WriteLine("WindowKeyUp");
         Editor.Emitter.WindowMouseMove += _ => Console.WriteLine("WindowMouseMove");
         Editor.Emitter.WindowMouseUp += _ => Console.WriteLine("WindowMouseUp");
-        Editor.Emitter.Warn += (warning, data) =>  Console.WriteLine("Warning: " + warning + serialize(data));
-        Editor.Emitter.Error += (error, data) => Console.WriteLine("Error: " + error + serialize(data));
-        Editor.Emitter.Info += (info, data) =>  Console.WriteLine("Info: " + info + serialize(data));
-        Editor.Emitter.Debug += (info, data) =>  Console.WriteLine("Debug: " + info + serialize(data));
+        Editor.Emitter.Warn += (warning, data) =>  Console.WriteLine("Warning: " + warning + Serialize(data));
+        Editor.Emitter.Error += (error, data) => Console.WriteLine("Error: " + error + Serialize(data));
+        Editor.Emitter.Info += (info, data) =>  Console.WriteLine("Info: " + info + Serialize(data));
+        Editor.Emitter.Debug += (info, data) =>  Console.WriteLine("Debug: " + info + Serialize(data));
 
         Editor.Use(new BasicRenderer());
         // editor.use(ContextMenuPlugin);
@@ -116,13 +102,6 @@
         Editor.AddNode(n2);
         Editor.AddNode(n3);
         Editor.Connect(n1.Outputs["num"], n2.Inputs["innum"]);
-        Styles = GetStyles();
         Engine.Emitter.OnProcess();
-    }
-
-    public void RequestAnimationFrame()
-    {
-        Engine.Abort();
-        Engine.ProcessData(Editor.ToJson(), "0");
     }
 }
