@@ -9,15 +9,9 @@ namespace retecs.BlazorServices
         [Inject]
         private IJSInProcessRuntime JsRuntime { get; }
 
-        public BrowserService(IJSRuntime inProcessRuntime)
-        {
-            JsRuntime = (IJSInProcessRuntime)inProcessRuntime;
-        }
+        public BrowserService(IJSRuntime inProcessRuntime) => JsRuntime = (IJSInProcessRuntime) inProcessRuntime;
 
-        public BrowserDimension GetDimension()
-        {
-            return JsRuntime.Invoke<BrowserDimension>("ReteCsInterop.getDimensions");
-        }
+        public BrowserDimension GetDimension() => JsRuntime.Invoke<BrowserDimension>("ReteCsInterop.getDimensions");
 
         public Point GetPositionOfElement(ElementReference elementReference)
         {
@@ -35,6 +29,7 @@ namespace retecs.BlazorServices
     public class BrowserDimension
     {
         public int Width { get; set; }
+
         public int Height { get; set; }
     }
 }

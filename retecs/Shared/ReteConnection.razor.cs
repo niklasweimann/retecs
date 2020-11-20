@@ -11,19 +11,26 @@ namespace retecs.Shared
 {
     public partial class ReteConnection
     {
-        public RenderFragment RenderFragment { get; set; }
+        private RenderFragment RenderFragment { get; set; }
+
         [Inject]
         private Emitter Emitter { get; set; }
+
         [Inject]
         public BrowserService BrowserService { get; set; }
+
         [Parameter]
         public Connection Connection { get; set; }
+
         [Parameter]
         public Input Input { get; set; }
+
         [Parameter]
         public Output Output { get; set; }
+
         [Parameter]
         public ElementReference InputElementReference { get; set; }
+
         [Parameter]
         public ElementReference OutputElementReference { get; set; }
 
@@ -34,7 +41,24 @@ namespace retecs.Shared
         protected override void OnInitialized()
         {
             base.OnInitialized();
-            Emitter.NodeTranslated += (a, b) => Update();
+            Emitter.NodeTranslated += (node, point) => Update();
+        }
+
+        protected override void OnAfterRender(bool firstRender)
+        {
+            base.OnAfterRender(firstRender);
+            //if (InputElementReference != null &&
+            //    OutputElementReference != null)
+            {
+                var points = GetPoints();
+                if (points == null)
+                {
+                    return;
+                }
+
+                var d = DefaultPath(points.Value, 0.4);
+                RenderFragment = RenderConnection(d, Connection);
+            }
         }
 
         public ReteConnection(Connection connection, Input input, Output output, Emitter emitter)
@@ -45,19 +69,35 @@ namespace retecs.Shared
             Emitter = emitter;
         }
 
-        public (Point,Point) GetPoints()
+        private (Point, Point)? GetPoints()
         {
-            return (GetSocketPosition(InputElementReference), GetSocketPosition(OutputElementReference));
+            //if (InputElementReference == null ||
+            //    OutputElementReference == null)
+            //{
+            //    return null;
+            //}
+
+           // Emitter.OnDebug($"InputElementReference: {InputElementReference == null}; OutputElementReference: {OutputElementReference == null}");
+
+            var input = GetSocketPosition(InputElementReference);
+            Emitter.OnDebug("Second Call");
+            var output = GetSocketPosition(OutputElementReference);
+            return (input, output);
         }
 
         public void Update()
         {
             var points = GetPoints();
-            Emitter.OnDebug($"Point 1: {points.Item1.X} {points.Item1.Y} Point 2: {points.Item2.X} {points.Item2.Y}");
-            var d = DefaultPath(points, 0.4);
+            if (points == null)
+            {
+                return;
+            }
+
+            Emitter.OnDebug($"Point 1: {points.Value.Item1.X} {points.Value.Item1.Y} Point 2: {points.Value.Item2.X} {points.Value.Item2.Y}");
+            var d = DefaultPath(points.Value, 0.4);
             Emitter.OnDebug("d is: " + d);
             RenderFragment = RenderConnection(d, Connection);
-            Emitter.OnUpdateConnection(Connection, GetPoints());
+            Emitter.OnUpdateConnection(Connection, points.Value);
             Emitter.OnDebug("Connection updated!");
         }
 
@@ -79,7 +119,7 @@ namespace retecs.Shared
             return connectionPath ?? string.Empty;
         }
 
-        public static RenderFragment RenderConnection(string d, Connection connection = null)
+        private static RenderFragment RenderConnection(string d, Connection connection = null)
         {
             var classes = new List<string>();
             if (connection != null)
@@ -106,13 +146,10 @@ namespace retecs.Shared
             return Path;
         }
 
-        public static string ToTrainCase(string str)
-        {
-            return str.ToLower().Replace(' ', '-');
-        }
+        private static string ToTrainCase(string str) => str.ToLower()
+                                                            .Replace(' ', '-');
 
-
-        public Point GetSocketPosition(ElementReference elementReference)
+        private Point GetSocketPosition(ElementReference elementReference)
         {
             return BrowserService.GetPositionOfElement(elementReference);
         }

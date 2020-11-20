@@ -5,36 +5,12 @@
 @using retecs.RenderPlugin
 @using System.Text.Json
 @using retecs.BlazorServices
-@inject BrowserService BrowserService;
 <!--TODO @onresize="@()"-->
 <!--TODO Contextmenu -->
 <div class="wrapper">
     <div class="node-editor"
-         style="@Styles">
+         style="overflow: hidden;touch-action: none; height:100%; min-height: 100%; display: block; position: absolute;
+          width: 100%; min-width: 100%">
         <ReteArea RenderFragment="@_renderFragment"></ReteArea>
     </div>
 </div>
-
-@code {
-    public NodeEditor Editor { get; set; }
-    public Engine Engine { get; set; }
-    RenderFragment _renderFragment;
-    public string Styles { get; set; }
-    int _innerHeight = 0;
-    int _innerWidth = 0;
-
-    protected string GetStyles()
-    {
-        var dimension = BrowserService.GetDimension();
-        _innerHeight = dimension.Height;
-        _innerWidth = dimension.Width;
-        var classes = new List<string> {"overflow: hidden", "touch-action: none", $"width: {_innerWidth}px", $"height: {_innerHeight}px"};
-        return string.Join("; ", classes);
-    }
-
-    public void RequestAnimationFrame()
-    {
-        Engine.Abort();
-        Engine.ProcessData(Editor.ToJson(), "0");
-    }
-}

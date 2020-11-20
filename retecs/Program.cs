@@ -12,6 +12,7 @@ namespace retecs
     {
         public static async Task Main(string[] args)
         {
+            await DebugDelayAsync();
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
 
@@ -20,8 +21,15 @@ namespace retecs
             builder.Services.AddSingleton(SingletonEmitter.Instance);
             builder.Services.AddSingleton(new ConnectionService());
             builder.Services.AddSingleton<BrowserService>();
-            
+
             await builder.Build().RunAsync();
+        }
+
+        private static async Task DebugDelayAsync()
+        {
+#if DEBUG
+            //await Task.Delay(10000);
+#endif
         }
     }
 }
