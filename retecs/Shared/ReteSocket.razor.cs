@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 using retecs.BlazorServices;
 using retecs.ReteCs;
 using retecs.ReteCs.core;
@@ -14,7 +15,13 @@ namespace retecs.Shared
         public ConnectionService ConnectionService { get; set; }
 
         [Inject]
+        public BrowserService BrowserService { get; set; }
+
+        [Inject]
         public Emitter Emitter { get; set; }
+
+        [Inject]
+        public IJSRuntime JsRuntime { get; set; }
 
         [Parameter]
         public IoTypes Type { get; set; }
@@ -48,16 +55,15 @@ namespace retecs.Shared
 
         private void HandleSocketClick(MouseEventArgs mouseEventArgs)
         {
-            if (Io.GetType()
-                  .IsAssignableFrom(typeof(Input)))
+            ((IJSInProcessRuntime)JsRuntime).InvokeVoid("ReteCsInterop.activate", SocketDot.Value);
+            if (Io.GetType().IsAssignableFrom(typeof(Input)))
             {
                 if (!ConnectionService.SetInput((Input) Io, Socket, SocketDot.Value))
                 {
                     Emitter.OnWarn("Could not create Connection");
                 }
             }
-            else if (Io.GetType()
-                       .IsAssignableFrom(typeof(Output)))
+            else if (Io.GetType().IsAssignableFrom(typeof(Output)))
             {
                 if (!ConnectionService.SetOutput((Output) Io, Socket, SocketDot.Value))
                 {

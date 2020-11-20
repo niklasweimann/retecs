@@ -44,6 +44,23 @@ namespace retecs.Shared
             Emitter.NodeTranslated += (node, point) => Update();
         }
 
+        protected override void OnAfterRender(bool firstRender)
+        {
+            base.OnAfterRender(firstRender);
+            //if (InputElementReference != null &&
+            //    OutputElementReference != null)
+            {
+                var points = GetPoints();
+                if (points == null)
+                {
+                    return;
+                }
+
+                var d = DefaultPath(points.Value, 0.4);
+                RenderFragment = RenderConnection(d, Connection);
+            }
+        }
+
         public ReteConnection(Connection connection, Input input, Output output, Emitter emitter)
         {
             Connection = connection;
@@ -52,16 +69,35 @@ namespace retecs.Shared
             Emitter = emitter;
         }
 
-        private (Point, Point) GetPoints() => (GetSocketPosition(InputElementReference), GetSocketPosition(OutputElementReference));
+        private (Point, Point)? GetPoints()
+        {
+            //if (InputElementReference == null ||
+            //    OutputElementReference == null)
+            //{
+            //    return null;
+            //}
+
+           // Emitter.OnDebug($"InputElementReference: {InputElementReference == null}; OutputElementReference: {OutputElementReference == null}");
+
+            var input = GetSocketPosition(InputElementReference);
+            Emitter.OnDebug("Second Call");
+            var output = GetSocketPosition(OutputElementReference);
+            return (input, output);
+        }
 
         public void Update()
         {
             var points = GetPoints();
-            Emitter.OnDebug($"Point 1: {points.Item1.X} {points.Item1.Y} Point 2: {points.Item2.X} {points.Item2.Y}");
-            var d = DefaultPath(points, 0.4);
+            if (points == null)
+            {
+                return;
+            }
+
+            Emitter.OnDebug($"Point 1: {points.Value.Item1.X} {points.Value.Item1.Y} Point 2: {points.Value.Item2.X} {points.Value.Item2.Y}");
+            var d = DefaultPath(points.Value, 0.4);
             Emitter.OnDebug("d is: " + d);
             RenderFragment = RenderConnection(d, Connection);
-            Emitter.OnUpdateConnection(Connection, GetPoints());
+            Emitter.OnUpdateConnection(Connection, points.Value);
             Emitter.OnDebug("Connection updated!");
         }
 
@@ -113,6 +149,9 @@ namespace retecs.Shared
         private static string ToTrainCase(string str) => str.ToLower()
                                                             .Replace(' ', '-');
 
-        private Point GetSocketPosition(ElementReference elementReference) => BrowserService.GetPositionOfElement(elementReference);
+        private Point GetSocketPosition(ElementReference elementReference)
+        {
+            return BrowserService.GetPositionOfElement(elementReference);
+        }
     }
 }
