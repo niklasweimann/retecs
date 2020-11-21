@@ -1,4 +1,4 @@
-﻿/*
+﻿/*                              
    Copyright 2009-2012 Arno Wacker, University of Kassel
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,18 @@
 */
 
 using System.ComponentModel;
+using Cryptool.PluginBase;
 
 namespace Cryptool.Caesar
 {
-    public class CaesarSettings
+    public class CaesarSettings : ISettings
     {
         #region Public Caesar specific interface
+        
+        /// <summary>
+        /// We use this delegate to send log messages from the settings class to the Caesar plugin
+        /// </summary>
+        public delegate void CaesarLogMessage(string msg, NotificationLevel loglevel);
 
         public enum CaesarMode { Encrypt = 0, Decrypt = 1 };
 
@@ -30,42 +36,55 @@ namespace Cryptool.Caesar
         public enum UnknownSymbolHandlingMode { Ignore = 0, Remove = 1, Replace = 2 };
 
 
+        /// <summary>
+        /// Feuern, wenn ein neuer Text im Statusbar angezeigt werden soll.
+        /// </summary>
+        public event CaesarLogMessage LogMessage;
+
         #endregion
 
         #region Private variables and public constructor
 
-        private CaesarMode _selectedAction = CaesarMode.Encrypt;
-        private string _upperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private string _lowerAlphabet = "abcdefghijklmnopqrstuvwxyz";
-        private string _alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private int _shiftValue = 3;
-        private string _shiftString;
-        private UnknownSymbolHandlingMode _unknownSymbolHandling = UnknownSymbolHandlingMode.Ignore;
-        private bool _caseSensitiveSensitive;
-        private bool _memorizeCase;
+        private CaesarMode selectedAction = CaesarMode.Encrypt;
+        private string upperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private string lowerAlphabet = "abcdefghijklmnopqrstuvwxyz";
+        private string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private int shiftValue = 3;
+        private string shiftString;
+        private UnknownSymbolHandlingMode unknownSymbolHandling = UnknownSymbolHandlingMode.Ignore;
+        private bool caseSensitiveSensitive = false;
+        private bool memorizeCase = false;
 
-        public CaesarSettings() => SetKeyByValue(_shiftValue);
+        public CaesarSettings()
+        {
+            SetKeyByValue(shiftValue);
+        }
 
         #endregion
 
         #region Private methods
 
-        private string RemoveEqualChars(string value)
+        private void OnLogMessage(string msg, NotificationLevel level)
         {
-            var length = value.Length;
+            if (LogMessage != null)
+                LogMessage(msg, level);
+        }
 
-            for (var i = 0; i < length; i++)
+        private string removeEqualChars(string value)
+        {
+            int length = value.Length;
+
+            for (int i = 0; i < length; i++)
             {
-                for (var j = i + 1; j < length; j++)
+                for (int j = i + 1; j < length; j++)
                 {
-                    if (value[i] != value[j] && !(!CaseSensitive & (char.ToUpper(value[i]) == char.ToUpper(value[j]))))
+                    if ((value[i] == value[j]) || (!CaseSensitive & (char.ToUpper(value[i]) == char.ToUpper(value[j]))))
                     {
-                        continue;
+                        OnLogMessage("Removing duplicate letter: \'" + value[j] + "\' from alphabet!", NotificationLevel.Warning);
+                        value = value.Remove(j,1);
+                        j--;
+                        length--;
                     }
-
-                    value = value.Remove(j,1);
-                    j--;
-                    length--;
                 }
             }
 
@@ -77,9 +96,9 @@ namespace Cryptool.Caesar
         /// </summary>
         public void SetKeyByValue(int offset, bool firePropertyChanges = true)
         {
-            // making sure the shift value lies within the alphabet range
-            _shiftValue = ((offset % _alphabet.Length) + _alphabet.Length) % _alphabet.Length;
-            _shiftString = "A -> " + _alphabet[_shiftValue];
+            // making sure the shift value lies within the alphabet range      
+            shiftValue = ((offset % alphabet.Length) + alphabet.Length) % alphabet.Length;
+            shiftString = "A -> " + alphabet[shiftValue];
 
             // Anounnce this to the settings pane
             if (firePropertyChanges)
@@ -87,123 +106,155 @@ namespace Cryptool.Caesar
                 OnPropertyChanged("ShiftValue");
                 OnPropertyChanged("ShiftString");
             }
+            // print some info in the log.
+            OnLogMessage("Accepted new shift value: " + offset, NotificationLevel.Debug);
         }
 
         #endregion
 
         #region Algorithm settings properties (visible in the Settings pane)
 
+        [PropertySaveOrder(4)]
+        [TaskPane("ActionTPCaption", "ActionTPTooltip", null, 1, false, ControlType.ComboBox, new string[] { "ActionList1", "ActionList2" })]
         public CaesarMode Action
         {
-            get => _selectedAction;
+            get
+            {
+                return this.selectedAction;
+            }
             set
             {
-                if (value == _selectedAction)
+                if (value != selectedAction)
                 {
-                    return;
+                    this.selectedAction = value;
+                    OnPropertyChanged("Action");
                 }
-
-                _selectedAction = value;
-                OnPropertyChanged("Action");
             }
         }
-
+        
+        [PropertySaveOrder(5)]
+        [TaskPane("ShiftValueCaption", "ShiftValueTooltip", null, 2, false, ControlType.NumericUpDown, ValidationType.RangeInteger, -1, 100)]        
         public int ShiftKey
         {
-            get => _shiftValue;
-            set => SetKeyByValue(value);
+            get { return shiftValue; }
+            set
+            {
+                SetKeyByValue(value);
+            }
         }
 
-        public string ShiftString => _shiftString;
+        [PropertySaveOrder(6)]
+        [TaskPane("ShiftStringCaption", "ShiftStringTooltip", null, 3, false, ControlType.TextBoxReadOnly)]
+        public string ShiftString
+        {
+            get { return shiftString; }
+        }
 
         //[SettingsFormat(0, "Normal", "Normal", "Black", "White", Orientation.Vertical)]
+        [PropertySaveOrder(7)]
+        [TaskPane("AlphabetSymbolsCaption", "AlphabetSymbolsTooltip", "AlphabetGroup", 4, false, ControlType.TextBox, "")]
         public string AlphabetSymbols
         {
-          get => _alphabet;
+          get { return this.alphabet; }
           set
           {
-            var a = RemoveEqualChars(value);
+            string a = removeEqualChars(value);
             if (a.Length == 0) // cannot accept empty alphabets
             {
+              OnLogMessage("Ignoring empty alphabet from user! Using previous alphabet: \"" + alphabet + "\" (" + alphabet.Length.ToString() + " Symbols)", NotificationLevel.Info);
             }
-            else if (!_alphabet.Equals(a))
+            else if (!alphabet.Equals(a))
             {
-              _alphabet = a;
-              SetKeyByValue(_shiftValue); //re-evaluate if the shiftvalue is still within the range
+              this.alphabet = a;
+              SetKeyByValue(shiftValue); //re-evaluate if the shiftvalue is still within the range
+              OnLogMessage("Accepted new alphabet from user: \"" + alphabet + "\" (" + alphabet.Length.ToString() + " Symbols)", NotificationLevel.Info);
               OnPropertyChanged("AlphabetSymbols");
             }
           }
         }
 
+        [PropertySaveOrder(8)]
+        [TaskPane("UnknownSymbolHandlingCaption", "UnknownSymbolHandlingTooltip", "AlphabetGroup", 5, false, ControlType.ComboBox, new string[] { "UnknownSymbolHandlingList1", "UnknownSymbolHandlingList2", "UnknownSymbolHandlingList3" })]
         public UnknownSymbolHandlingMode UnknownSymbolHandling
         {
-            get => _unknownSymbolHandling;
+            get { return this.unknownSymbolHandling; }
             set
             {
-                if (value == _unknownSymbolHandling)
+                if (value != unknownSymbolHandling)
                 {
-                    return;
+                    this.unknownSymbolHandling = value;
+                    OnPropertyChanged("UnknownSymbolHandling");
                 }
-
-                _unknownSymbolHandling = value;
-                OnPropertyChanged("UnknownSymbolHandling");
             }
         }
 
+        /// <summary>
+        /// Visible setting how to deal with alphabet case. false = case insensitive, true = case sensitive
+        /// </summary
+        [PropertySaveOrder(9)]
+        [TaskPane("AlphabetCaseCaption", "AlphabetCaseTooltip", "AlphabetGroup", 6, false, ControlType.CheckBox)]
         public bool CaseSensitive
         {
-            get => _caseSensitiveSensitive;
+            get { return this.caseSensitiveSensitive; }
             set
             {
-                if (value == _caseSensitiveSensitive)
-                {
+                if (value == caseSensitiveSensitive)
                     return;
-                }
 
-                if (value)
+                if (value == true)
                 {
-                    _memorizeCase = false;
+                    memorizeCase = false;
                     OnPropertyChanged("MemorizeCase");
                 }
 
-                _caseSensitiveSensitive = value;
+                this.caseSensitiveSensitive = value;
                 if (value)
                 {
-                    if (_alphabet == _upperAlphabet)
+                    if (alphabet == upperAlphabet)
                     {
-                        _alphabet = _upperAlphabet + _lowerAlphabet;
+                        alphabet = upperAlphabet + lowerAlphabet;
+                        OnLogMessage(
+                            "Changing alphabet to: \"" + alphabet + "\" (" + alphabet.Length + " Symbols)",
+                            NotificationLevel.Debug);
                         OnPropertyChanged("AlphabetSymbols");
                     }
                 }
                 else
                 {
-                    if (_alphabet == _upperAlphabet + _lowerAlphabet)
+                    if (alphabet == (upperAlphabet + lowerAlphabet))
                     {
-                        _alphabet = _upperAlphabet;
+                        alphabet = upperAlphabet;
+                        OnLogMessage(
+                            "Changing alphabet to: \"" + alphabet + "\" (" + alphabet.Length + " Symbols)",
+                            NotificationLevel.Debug);
                         OnPropertyChanged("AlphabetSymbols");
                         // re-set also the key (shiftvalue/shiftString to be in the range of the new alphabet
-                        SetKeyByValue(_shiftValue);
+                        SetKeyByValue(shiftValue);
                     }
                 }
 
                 // remove equal characters from the current alphabet
-                var a = _alphabet;
-                _alphabet = RemoveEqualChars(_alphabet);
+                string a = alphabet;
+                alphabet = removeEqualChars(alphabet);
 
-                if (a != _alphabet)
+                if (a != alphabet)
                 {
                     OnPropertyChanged("AlphabetSymbols");
+                    OnLogMessage("Changing alphabet to: \"" + alphabet + "\" (" + alphabet.Length.ToString() + " Symbols)", NotificationLevel.Info);
                 }
 
                 OnPropertyChanged("CaseSensitive");
             }
         }
+
+        [PropertySaveOrder(10)]
+        [TaskPane("MemorizeCaseCaption", "MemorizeCaseTooltip", "AlphabetGroup", 7, false, ControlType.CheckBox)]
         public bool MemorizeCase
         {
-            get => _memorizeCase;
+            get {return memorizeCase;}
             set
             {
-                _memorizeCase = !CaseSensitive && value;
+                memorizeCase = CaseSensitive ? false : value;
                 OnPropertyChanged("MemorizeCase");
             }
         }
@@ -215,10 +266,16 @@ namespace Cryptool.Caesar
         public event PropertyChangedEventHandler PropertyChanged;
         public void Initialize()
         {
-
+            
         }
 
-        private void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        private void OnPropertyChanged(string name)
+        {          
+          if (PropertyChanged != null)
+          {
+            PropertyChanged(this, new PropertyChangedEventArgs(name));
+          }
+        }
 
         #endregion
     }

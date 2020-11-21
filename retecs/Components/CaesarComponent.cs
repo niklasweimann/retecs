@@ -37,7 +37,9 @@ namespace retecs.Components
             caesar.Settings.ShiftKey = (int)rot;
             caesar.Settings.UnknownSymbolHandling = CaesarSettings.UnknownSymbolHandlingMode.Ignore;
 
+            Emitter.OnDebug("Start executing Plugin");
             caesar.Execute();
+            Emitter.OnDebug("Stop executing Plugin");
 
             var editorNode = Editor.Nodes.FirstOrDefault(n => n.Id == node.Id);
 

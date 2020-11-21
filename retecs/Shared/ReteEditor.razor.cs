@@ -75,76 +75,6 @@ namespace retecs.Shared
         protected override void OnInitialized()
         {
             base.OnInitialized();
-
-            static string Serialize(object data)
-            {
-                if (data != null)
-                {
-                    return "; Data: " + JsonSerializer.Serialize(data);
-                }
-
-                return "";
-            }
-
-            Editor = new NodeEditor("rete@0.0.1", Emitter);
-            Editor.Emitter.WindowKeyDown += _ => Console.WriteLine("WindowKeyDown");
-            Editor.Emitter.WindowKeyUp += _ => Console.WriteLine("WindowKeyUp");
-            Editor.Emitter.WindowMouseMove += _ => Console.WriteLine("WindowMouseMove");
-            Editor.Emitter.WindowMouseUp += _ => Console.WriteLine("WindowMouseUp");
-            Editor.Emitter.Warn += (warning, data) => Console.WriteLine("Warning: " + warning + Serialize(data));
-            Editor.Emitter.Error += (error, data) => Console.WriteLine("Error: " + error + Serialize(data));
-            Editor.Emitter.Info += (info, data) => Console.WriteLine("Info: " + info + Serialize(data));
-            Editor.Emitter.Debug += (info, data) => Console.WriteLine("Debug: " + info + Serialize(data));
-
-            Editor.Use(new BasicRenderer());
-            // editor.use(ContextMenuPlugin);
-
-            Engine = new Engine("rete@0.0.1", Emitter);
-            var components = new List<Component> {new NumComponent(Emitter), new NumOutComponent(Emitter)};
-            components.ForEach(component =>
-                               {
-                                   Editor.Register(component);
-                                   Engine.Register(component);
-                               });
-
-            var n1 = components[0]
-                .CreateNode(new Dictionary<string, object>
-                            {
-                                {"num", 2}
-                            });
-            var n2 = components[1]
-                .CreateNode(new Dictionary<string, object>());
-            var n3 = components[1]
-                .CreateNode(new Dictionary<string, object>());
-            n1.Position = new Point(80, 200);
-            n2.Position = new Point(400, 200);
-            n3.Position = new Point(400, 400);
-            Editor.Emitter.Process += RequestAnimationFrame;
-            Editor.Emitter.ConnectionCreated += _ => RequestAnimationFrame();
-            Editor.Emitter.ConnectionRemoved += _ => RequestAnimationFrame();
-            Editor.Emitter.NodeRemoved += _ => RequestAnimationFrame();
-            Editor.Emitter.NodeCreated += _ => RequestAnimationFrame();
-
-            Editor.Emitter.NodeCreated += node =>
-                                          {
-                                              _renderFragment += builder =>
-                                                                 {
-                                                                     builder.OpenComponent<ReteNode>(Sequence);
-                                                                     builder.AddAttribute(Sequence, "Editor", Editor);
-                                                                     builder.AddAttribute(Sequence, "Node", node);
-                                                                     builder.CloseComponent();
-                                                                 };
-                                          };
-            Editor.AddNode(n1);
-            Editor.AddNode(n2);
-            Editor.AddNode(n3);
-            //Editor.Connect(n1.Outputs["num"], n2.Inputs["innum"]);
-            Engine.Emitter.OnProcess();
-        }
-
-        protected override void OnInitialized()
-        {
-            base.OnInitialized();
             Func<object, string> serialize = data =>
                                              {
                                                  if (data != null)
@@ -242,7 +172,6 @@ namespace retecs.Shared
             Editor.AddNode(n2);
             Editor.AddNode(n3);
             Editor.AddNode(n4);
-            Styles = GetStyles();
             Engine.Emitter.OnProcess();
         }
 
